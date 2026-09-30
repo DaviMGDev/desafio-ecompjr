@@ -4,21 +4,33 @@
 > **FastAPI + PostgreSQL** para cadastro de fornecedores, produtos e categorias e
 > para auditoria de movimentações de estoque.
 >
-> **Status atual: repositório sem código.** Ainda não existe `pyproject.toml`,
-> `app/`, migrations ou banco. Este arquivo descreve o alvo; comandos abaixo são
-> o contrato esperado depois do bootstrap.
+> **Status atual: implementação concluída.** A API está bootstrapped (`pyproject.toml`,
+> `app/` em 6 camadas, 2 migrations Alembic, 13 ADRs aceitos, 78 testes, CI verde,
+> README detalhado). O trabalho restante é **preparação para a defesa técnica (§ 6)**
+> — material local em `.pi/defesa/`. Não faça bootstrap nem re-scaffold: o código
+> existente é o contrato.
 
 ## Fonte da verdade
 
 | Caminho | Papel |
 |---|---|
 | `desafio-tecnico-backend-prosel-2026.2/desafio-tecnico-backend-prosel-2026.2.md` | Enunciado oficial (**read-only** — nunca editar) |
-| `specs/` | Especificações do projeto: contrato spec-md (`SPEC.md`), features BDD em `specs/features/` e decisões em prosa |
-| `docs/adr/` | ADRs — decisões técnicas explicáveis na defesa (ver *Registro de decisões (ADR)*) |
-| `README.md` | Documentação de entrega (setup, rotas, exemplos) — ainda não existe |
+| `specs/SPEC.md` | Contrato spec-md: contexto, histórias, arquitetura, dados, API, decisões |
+| `specs/index.md` + `specs/log.md` | Registro do nó MKF e log de atividades — atualize o log ao mexer na spec |
+| `specs/features/` | Comportamentos acordados em Gherkin pt-BR (59 cenários) |
+| `docs/adr/` | ADRs 0001–0013 aceitos e implementados (ver *Registro de decisões (ADR)*) |
+| `README.md` | Documentação de entrega (setup, rotas, exemplos) — espelha o OpenAPI |
+| `.pi/` | Estado local do agente (planos, defesa) — gitignored, nunca é entrega |
 
 Em caso de conflito entre um `specs/*` e o enunciado, o **enunciado vence**.
 Não invente requisitos: se algo não está no enunciado, marque como decisão de projeto.
+
+## Fase atual
+
+Implementação encerrada; o próximo trabalho é a **defesa técnica (§ 6)**: estudar
+o fluxo de movimentação, o lock pessimista, as decisões dos ADRs e treinar em voz
+alta (registro em `.pi/defesa/`). Não adicione funcionalidade fora do enunciado
+sem pedido explícito.
 
 ## Idioma e escrita
 
@@ -46,8 +58,11 @@ Decidido pelo candidato:
 
 - Gerenciamento de ambiente com **uv** como fluxo principal, mantendo
   **compatibilidade com `pip` + `requirements.txt`** (quem avalia pode não ter `uv`)
-- Camadas/estrutura de diretórios: **em aberto**. Não imponha uma arquitetura antes
-  de o usuário decidir; proponha opções, registre a escolha e siga o padrão já existente.
+- Estrutura decidida (ADR-0009): `app/routers` (HTTP + OpenAPI) → `app/services`
+  (regras de negócio e transações, usando `Session` direto, sem repositórios) →
+  `app/models` (SQLAlchemy) com `app/schemas` (Pydantic) separados; `app/core`
+  (config, segurança, validadores, integridade) e `app/api` (deps, handlers de
+  erro, helpers de OpenAPI). Módulos novos seguem essa divisão.
 
 Toda decisão relevante (transações, locks, estratégia de erro, modelagem de
 relacionamentos) deve ser explicável em voz alta — haverá **defesa técnica** (§ 6).
@@ -57,10 +72,12 @@ relacionamentos) deve ser explicável em voz alta — haverá **defesa técnica*
 Fluxo principal (`uv`):
 
 ```bash
+docker compose up -d db                    # sobe o PostgreSQL local
 uv sync                                   # instala deps do pyproject + lock
 uv run uvicorn app.main:app --reload      # sobe a API em dev
 uv run alembic revision --autogenerate -m "cria tabela produtos"
 uv run alembic upgrade head               # aplica migrations
+uv run python -m app.seed                 # cria o admin a partir do .env
 uv run pytest -q                          # testes
 uv run ruff check . && uv run ruff format .
 ```
@@ -75,8 +92,7 @@ pip install -r requirements.txt
 
 - `requirements.txt` é **artefato gerado** — nunca edite à mão; se o fluxo mudar,
   ele é regenerado pelo `uv export`.
-- Banco local: subir via Docker/Postgres é decisão pendente; se existir
-  `docker-compose.yml`, documente o comando no README.
+- Banco local: `docker compose up -d db` sobe o PostgreSQL 16 (config em `docker-compose.yml`).
 - Nunca commite `.env`, `venv/`, `__pycache__/`, dumps de banco ou credenciais.
 
 ## Invariantes de domínio
@@ -86,25 +102,39 @@ Resumo operacional — os detalhes ficam em `specs/` quando existir. Nunca viole
 1. **Movimentação de estoque é imutável**: só `POST` e leitura. Não crie rota de
    `PUT`/`PATCH`/`DELETE` para movimentações, nem permita alterá-las por efeito colateral.
 2. **Toda movimentação atualiza o saldo do produto na mesma transação** que a insere;
-   se o saldo ficar negativo e isso for inválido, a transação inteira falha.
+   saída maior que o saldo → 409 com rollback total. Lock pessimista
+   (`SELECT ... FOR UPDATE` na linha do produto) serializa a seção crítica (ADR-0003).
 3. **Categoria com produtos vinculados não pode ser excluída** (§ 2.c) — responda com erro claro, não com 500.
 4. **Unicidade garantida no banco**, não apenas na aplicação: `produto.sku`,
    `fornecedor.cnpj`, `fornecedor.email`, `categoria.nome`.
-5. **Integridade referencial** explícita (FKs + política de `ON DELETE`) — decida e justifique.
+5. **Integridade referencial** explícita: FKs com `ON DELETE RESTRICT` em todas as
+   relações (ADR-0005); exclusão com vínculo → 409, nunca 500.
 6. **Consulta avançada é requisito obrigatório**: produtos em/abaixo do estoque mínimo
    e filtro de movimentações por período e/ou fornecedor.
-7. **Erros padronizados**: modelo de resposta único, HTTP correto
+7. **Erros padronizados**: envelope único `{"detail": ...}` (ADR-0004), HTTP correto
    (400/404/409/422 conforme o caso, 500 para falhas internas), **sem stack trace** e
    **sem 200 em requisição falha**.
 
 ## Erros, validação e documentação da API
 
-- Use `HTTPException`/exception handlers do FastAPI com um schema de erro único
-  (`{"detail": ...}` ou envelope próprio — decida e documente).
-- Validação de entrada via Pydantic; não valide à mão o que o schema já garante.
-- Cada endpoint precisa de: método, path, query/path params, body de exemplo,
-  respostas 2xx e 4xx/5xx **com JSON de exemplo** — no OpenAPI (docstrings/`responses=`)
-  e espelhado no `README.md`. Collection Postman/Insomnia é opcional e complementar.
+- Decidido (ADR-0004): envelope único `{"detail": ...}` — string nas falhas de
+  negócio, lista no 422 do Pydantic. Handlers globais em `app/api/errors.py`
+  (`IntegrityError` → 409; exceção não tratada → 500 logado, sem stack trace).
+- Services levantam `HTTPException` direto com mensagem pt-BR; o router não repete
+  validação que o schema cobre. Colisão de unicidade se mapeia com
+  `conflito_de_integridade` (`app/core/integridade.py`) + `_MENSAGENS_DE_CONFLITO`.
+- Cada endpoint: `responses=` com exemplos 2xx/4xx via helpers de
+  `app/api/openapi.py` (`resposta`, `RESPOSTAS_LEITURA`, `RESPOSTAS_ESCRITA`)
+  e espelho no `README.md`. Collection Postman/Insomnia é opcional e complementar.
+
+## Autenticação e perfis (diferencial § 3.a aceito)
+
+- `main.py` protege todos os routers com `dependencies=[Depends(usuario_atual)]`;
+  público apenas `/health` e `POST /auth/login`. **Router novo precisa da dependência.**
+- Escrita: `dependencies=[Depends(exigir_admin)]` na própria rota; leitura: qualquer
+  perfil autenticado. 401 = token ausente/inválido; 403 = leitor tentando escrever.
+- Segredos só via `.env` (`JWT_SECRET`, `JWT_EXPIRE_MINUTES`); admin semeado por
+  `uv run python -m app.seed` (`ADMIN_EMAIL`/`ADMIN_PASSWORD`). Nunca commite segredo.
 
 ## Qualidade de código e comentários
 
@@ -132,11 +162,17 @@ Vale nota (§ 2.f e barema: **2 pontos**) — trate como requisito, não como fo
 
 ## Testes e CI (diferencial)
 
-- `pytest` + `fastapi.testclient`/`httpx`, com fixtures de banco isoladas
-  (transação revertida por teste) — sem depender de ordem de execução.
+- Cada teste roda numa transação externa revertida no fim via savepoint (ADR-0012).
+  Não crie fixture que commita no banco real nem dependa de ordem de execução
+  (`pytest-randomly` roda fora de ordem de propósito).
+- `client` já autentica como admin; `client_sem_auth` e `cliente_leitor` cobrem
+  401/403. Teste novo entra no `tests/test_<recurso>.py` correspondente.
 - Cubra as regras de negócio, não só o caminho feliz: imutabilidade da movimentação,
   exclusão de categoria com produtos, unicidade de `cnpj`/`email`/`sku`, saldo após entrada/saída.
-- Workflow de CI (GitHub Actions) rodando lint + testes em cada push é esperado (§ 3.b).
+- CI (`.github/workflows/ci.yml`): Postgres 16 como service, `uv sync --locked`, ruff,
+  `alembic upgrade head` e pytest. Mexeu em dependência → rode
+  `uv export --no-hashes -o requirements.txt` e garanta `uv.lock` atualizado
+  (o `--locked` quebra a run se não).
 
 ## Segurança e concorrência (diferenciais)
 
@@ -165,6 +201,10 @@ comportamento esperado do agente:
 
 `docs/adr/` é o diário de decisões que sustentam a defesa técnica (§ 6). O agente
 mantém esse diretório atualizado:
+
+Estado: **0001–0013 aceitos e implementados** (layout/stack, lock, erros, deletes,
+filtros, unicidade, CNPJ, testes, auth). Decisão nova ou alterada gera ADR novo —
+nunca reescreva um aceito.
 
 - **Detecte a decisão.** Toda escolha entre alternativas defensáveis — modelagem,
   `ON DELETE`, transação/lock, estratégia de erro, autenticação, layout de pastas,
