@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 
 from app.api.errors import registrar_handlers
+from app.routers import auth as rotas_auth
 from app.routers import categorias as rotas_categorias
 from app.routers import fornecedores as rotas_fornecedores
 from app.routers import movimentacoes as rotas_movimentacoes
@@ -18,6 +19,7 @@ app = FastAPI(
 )
 
 registrar_handlers(app)
+app.include_router(rotas_auth.router)
 app.include_router(rotas_fornecedores.router)
 app.include_router(rotas_categorias.router)
 app.include_router(rotas_produtos.router)

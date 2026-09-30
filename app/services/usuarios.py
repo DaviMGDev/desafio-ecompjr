@@ -1,9 +1,10 @@
 """Regras de negócio de usuários."""
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.seguranca import gerar_hash
+from app.core.seguranca import gerar_hash, verificar_senha
 from app.models import PerfilUsuario, Usuario
 
 
@@ -32,3 +33,11 @@ def criar_admin_se_nao_existir(session: Session, email: str, senha: str) -> tupl
     session.commit()
     session.refresh(usuario)
     return usuario, True
+
+
+def autenticar(session: Session, email: str, senha: str) -> Usuario:
+    """Confere as credenciais; e-mail inexistente e senha errada têm a mesma resposta."""
+    usuario = obter_por_email(session, email)
+    if usuario is None or not verificar_senha(senha, usuario.senha_hash):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "E-mail ou senha inválidos")
+    return usuario
