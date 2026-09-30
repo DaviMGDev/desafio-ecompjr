@@ -63,7 +63,11 @@ def entrar_painel(email: str = "", senha: str = "", sess=None):
         sessao.entrar(sess, corpo["access_token"])
         return Redirect("/produtos")
 
-    mensagem = api.mensagem_do_detail(corpo) if corpo else "Não foi possível falar com a API."
+    mensagem = (
+        api.mensagem_do_detail(api.detail_do_corpo(corpo))
+        if corpo
+        else "Não foi possível falar com a API."
+    )
     return _tela(erro=mensagem, email=email)
 
 

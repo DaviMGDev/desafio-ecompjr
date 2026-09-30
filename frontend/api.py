@@ -38,6 +38,13 @@ def requisitar(
     return resposta.status_code, corpo
 
 
+def detail_do_corpo(corpo: Any) -> Any:
+    """Extrai o `detail` do envelope de erro da API (o corpo inteiro se não houver)."""
+    if isinstance(corpo, dict) and "detail" in corpo:
+        return corpo["detail"]
+    return corpo
+
+
 def mensagem_do_detail(detail: Any) -> str:
     """Texto exibível do envelope `detail` (string ou lista do 422)."""
     if isinstance(detail, str):
