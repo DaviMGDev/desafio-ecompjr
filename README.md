@@ -8,6 +8,8 @@ Prosel 2026.2 (EcompJr/UEFS).
 - Comportamentos BDD: [`specs/features/`](specs/features/)
 - Decisões de arquitetura: [`docs/adr/`](docs/adr/)
 - Documentação interativa: `http://localhost:8000/docs` (Swagger/OpenAPI)
+- Painel web (extra, não exigido pelo enunciado): [`frontend/`](frontend/README.md) —
+  FastHTML consumindo esta API (ADR-0014)
 
 ## Sumário
 
@@ -18,6 +20,7 @@ Prosel 2026.2 (EcompJr/UEFS).
 - [Endpoints](#endpoints)
 - [Modelo de erro](#modelo-de-erro)
 - [Regras de negócio](#regras-de-negócio)
+- [Painel web (extra)](#painel-web-extra)
 - [Testes e CI](#testes-e-ci)
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Decisões registradas (ADRs)](#decisões-registradas-adrs)
@@ -77,6 +80,11 @@ uv run alembic downgrade -1                  # reverte uma migration
 | `JWT_EXPIRE_MINUTES` | não         | Validade do token em minutos (padrão 60)                         |
 | `ADMIN_EMAIL`        | seed        | E-mail do admin criado por `python -m app.seed`                  |
 | `ADMIN_PASSWORD`     | seed        | Senha do admin (armazenada apenas como hash argon2)              |
+| `LEITOR_EMAIL`       | não         | E-mail do usuário leitor semeado (demo do 403; ADR-0016)         |
+| `LEITOR_PASSWORD`    | não         | Senha do usuário leitor                                          |
+| `API_URL`            | painel      | URL da API consumida pelo painel FastHTML (padrão `:8000`)       |
+| `SESSION_SECRET`     | painel      | Segredo que assina o cookie de sessão do painel                  |
+| `TEST_DATABASE_URL`  | testes      | Banco da suíte; sem ela, usa `<DATABASE_URL>_test` (criado sozinho) |
 
 O `.env.example` traz valores de exemplo; o `.env` é ignorado pelo git.
 
@@ -332,6 +340,20 @@ Envelope único `{"detail": ...}`: string nos erros de negócio, lista de erros 
   filtros de movimentação por período (inclusivo), fornecedor, tipo e produto.
 - **Paginação**: `limit` (máx. 100) e `offset` com padrão 20.
 
+## Painel web (extra)
+
+Uma UI FastHTML consome a API por HTTP e não altera nada do backend (ADR-0014):
+
+```bash
+uv sync --group frontend                     # dependências do painel (ADR-0015)
+uv run --group frontend python -m frontend.main   # painel em http://localhost:5001
+```
+
+O contrato visual está em [`specs/DESIGN.md`](specs/DESIGN.md) e as telas em
+[`specs/layout/`](specs/layout/) (LAYOUT v1); detalhes de uso, telas e auditoria
+em [`frontend/README.md`](frontend/README.md). O leitor semeado (`LEITOR_*`)
+permite demonstrar o 403 de escrita ao vivo.
+
 ## Testes e CI
 
 ```bash
@@ -343,6 +365,11 @@ com vínculo, unicidades, saldo após entrada/saída, consultas e **concorrênci
 (duas saídas simultâneas com threads e conexões reais). As fixtures de API usam
 transação revertida por teste, sem depender de ordem (`pytest-randomly`).
 
+Os testes rodam num banco próprio: por padrão `<DATABASE_URL>_test`, criado na
+primeira execução e recriado a cada sessão (ou o banco de `TEST_DATABASE_URL`).
+Assim, dados de desenvolvimento/demonstração no banco principal não interferem
+na suíte — e a suíte não os toca.
+
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em cada
 push: lint (`ruff`), migration (`alembic upgrade head`) e testes, com um serviço
 PostgreSQL 16.
@@ -353,16 +380,17 @@ PostgreSQL 16.
 app/
   main.py            # aplicação FastAPI (handlers + routers)
   db.py              # engine e sessão (dependency injection)
-  seed.py            # criação do admin a partir do ambiente
+  seed.py            # criação do admin (e do leitor, se LEITOR_* no .env)
   core/              # config, segurança (hash/JWT), validadores, integridade
   models/            # SQLAlchemy: fornecedor, categoria, produto, movimentação, usuário
   schemas/           # Pydantic: entrada/saída da API
   routers/           # rotas por recurso
   services/          # regras de negócio e transações
 migrations/          # Alembic
-specs/               # SPEC.md, index, log e features BDD
+specs/               # SPEC.md, index, log, features BDD, DESIGN.md e layout/
 docs/adr/            # decisões de arquitetura
-tests/               # pytest (fixtures isoladas por transação)
+tests/               # pytest (fixtures isoladas por transação, banco de teste)
+frontend/            # painel FastHTML (extra; ADR-0014) — ver frontend/README.md
 ```
 
 ## Decisões registradas (ADRs)

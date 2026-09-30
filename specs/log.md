@@ -29,3 +29,13 @@ updated: "2026-09-30"
   `specs/layout/*.layout.txt` (seis telas, parse check exit 0) — contrato do
   front-end registrado antes do código; a subpasta `layout/` existe porque o
   formato LAYOUT v1 exige um arquivo por tela.
+- Front-end implementado a partir do contrato: login, CRUD de
+  fornecedores/categorias/produtos, movimentações com o saldo atualizado na hora
+  e consulta de estoque baixo; leitor sem controles de escrita. Testes de tela
+  reutilizam a fixture transacional (59) e a suíte da API segue com 79.
+- Auditoria de viewport/teclado/contraste com o stack real: tema claro fixo,
+  contraste do menu e grade de formulários corrigidos, indicadores de
+  carregamento adicionados; único achado mantido é a ausência de meta description
+  (painel interno). Relatório em `frontend/README.md`.
+- Suíte isolada em banco próprio (`<DATABASE_URL>_test` ou `TEST_DATABASE_URL`)
+  para não ler nem tocar dados de demonstração do banco principal.

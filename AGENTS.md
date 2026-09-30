@@ -4,11 +4,13 @@
 > **FastAPI + PostgreSQL** para cadastro de fornecedores, produtos e categorias e
 > para auditoria de movimentações de estoque.
 >
-> **Status atual: implementação concluída.** A API está bootstrapped (`pyproject.toml`,
-> `app/` em 6 camadas, 2 migrations Alembic, 13 ADRs aceitos, 78 testes, CI verde,
-> README detalhado). O trabalho restante é **preparação para a defesa técnica (§ 6)**
-> — material local em `.pi/defesa/`. Não faça bootstrap nem re-scaffold: o código
-> existente é o contrato.
+> **Status atual: API concluída; painel web (extra) implementado.** A API está
+> bootstrapped (`pyproject.toml`, `app/` em 6 camadas, 2 migrations Alembic, 16 ADRs
+> aceitos, 79 testes, CI verde, README detalhado). O painel FastHTML vive em
+> `frontend/` e consome a API por HTTP (ADR-0014) — o backend é intocável por ele.
+> O trabalho restante é **preparação para a defesa técnica (§ 6)** — material local
+> em `.pi/defesa/`. Não faça bootstrap nem re-scaffold: o código existente é o
+> contrato.
 
 ## Fonte da verdade
 
@@ -18,7 +20,7 @@
 | `specs/SPEC.md` | Contrato spec-md: contexto, histórias, arquitetura, dados, API, decisões |
 | `specs/index.md` + `specs/log.md` | Registro do nó MKF e log de atividades — atualize o log ao mexer na spec |
 | `specs/features/` | Comportamentos acordados em Gherkin pt-BR (59 cenários) |
-| `docs/adr/` | ADRs 0001–0013 aceitos e implementados (ver *Registro de decisões (ADR)*) |
+| `docs/adr/` | ADRs 0001–0016 aceitos e implementados (ver *Registro de decisões (ADR)*) |
 | `README.md` | Documentação de entrega (setup, rotas, exemplos) — espelha o OpenAPI |
 | `.pi/` | Estado local do agente (planos, defesa) — gitignored, nunca é entrega |
 
@@ -27,10 +29,10 @@ Não invente requisitos: se algo não está no enunciado, marque como decisão d
 
 ## Fase atual
 
-Implementação encerrada; o próximo trabalho é a **defesa técnica (§ 6)**: estudar
-o fluxo de movimentação, o lock pessimista, as decisões dos ADRs e treinar em voz
-alta (registro em `.pi/defesa/`). Não adicione funcionalidade fora do enunciado
-sem pedido explícito.
+Implementação encerrada (API + painel); o próximo trabalho é a **defesa técnica
+(§ 6)**: estudar o fluxo de movimentação, o lock pessimista, as decisões dos ADRs
+e treinar em voz alta (registro em `.pi/defesa/`). Não adicione funcionalidade
+fora do enunciado sem pedido explícito.
 
 ## Idioma e escrita
 
@@ -77,9 +79,14 @@ uv sync                                   # instala deps do pyproject + lock
 uv run uvicorn app.main:app --reload      # sobe a API em dev
 uv run alembic revision --autogenerate -m "cria tabela produtos"
 uv run alembic upgrade head               # aplica migrations
-uv run python -m app.seed                 # cria o admin a partir do .env
-uv run pytest -q                          # testes
+uv run python -m app.seed                 # cria admin (e leitor, se LEITOR_*) do .env
+uv run pytest -q                          # testes (banco <DATABASE_URL>_test próprio)
 uv run ruff check . && uv run ruff format .
+
+# painel web (extra — ADR-0014/0015): API em :8000 e painel em :5001
+uv sync --group frontend
+uv run --group frontend python -m frontend.main
+uv run --group frontend pytest frontend/tests
 ```
 
 Compatibilidade com `pip` (para quem for avaliar sem `uv`):
@@ -93,6 +100,8 @@ pip install -r requirements.txt
 - `requirements.txt` é **artefato gerado** — nunca edite à mão; se o fluxo mudar,
   ele é regenerado pelo `uv export`.
 - Banco local: `docker compose up -d db` sobe o PostgreSQL 16 (config em `docker-compose.yml`).
+- Testes usam um banco próprio (`<DATABASE_URL>_test`, criado na primeira execução;
+  ou `TEST_DATABASE_URL`): dados de demo no banco principal não afetam a suíte.
 - Nunca commite `.env`, `venv/`, `__pycache__/`, dumps de banco ou credenciais.
 
 ## Invariantes de domínio
@@ -202,9 +211,9 @@ comportamento esperado do agente:
 `docs/adr/` é o diário de decisões que sustentam a defesa técnica (§ 6). O agente
 mantém esse diretório atualizado:
 
-Estado: **0001–0013 aceitos e implementados** (layout/stack, lock, erros, deletes,
-filtros, unicidade, CNPJ, testes, auth). Decisão nova ou alterada gera ADR novo —
-nunca reescreva um aceito.
+Estado: **0001–0016 aceitos e implementados** (layout/stack, lock, erros, deletes,
+filtros, unicidade, CNPJ, testes, auth, front-end separado, grupo opcional e seed
+do leitor). Decisão nova ou alterada gera ADR novo — nunca reescreva um aceito.
 
 - **Detecte a decisão.** Toda escolha entre alternativas defensáveis — modelagem,
   `ON DELETE`, transação/lock, estratégia de erro, autenticação, layout de pastas,

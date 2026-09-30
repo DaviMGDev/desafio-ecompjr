@@ -236,7 +236,8 @@ Pilha 100% de sistema — nada de webfont, nada de FOUT nem dependência de rede
 - Filtros e formulários em **grade fluida** (`auto-fit`, mínimo 200px); em telas
   estreitas empilham em uma coluna, com labels acima dos campos.
 - Listas usam "carregar mais" (a API não expõe contagem total): o botão fica ao
-  fim da lista e anexa os próximos 20 itens.
+  fim da lista e refaz a consulta com +20 itens (`limit`), preservando os filtros;
+  a lista cresce no lugar e para no teto de 100 da API.
 - Tabelas/listas densas viram **cartões empilhados** abaixo de 720px, com o
   par rótulo/valor em linha; acima disso, grade em colunas.
 

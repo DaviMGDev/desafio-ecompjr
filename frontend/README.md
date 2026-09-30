@@ -65,7 +65,36 @@ uv run --group frontend pytest frontend/tests
 
 Os testes dirigem o app FastHTML com `fasthtml.common.Client` (`HX-Request`
 quando o fluxo é parcial) e apontam o cliente HTTP do painel para o app ASGI da
-API, reutilizando a fixture transacional do ADR-0012 — sem servidor real.
+API, reutilizando a fixture transacional do ADR-0012 — sem servidor real. A suíte
+usa o banco de teste (`<DATABASE_URL>_test`, ou `TEST_DATABASE_URL`), separado do
+banco de demonstração.
+
+## Auditoria
+
+Checagens feitas no Chrome DevTools com o stack real (Postgres + API + painel) e
+dados de demonstração, em desktop (1440px), tablet (834px) e celular (390px):
+
+- **Responsivo:** sem scroll horizontal nas três larguras (medido com
+  `scrollWidth == clientWidth`); listas empilham em cartões no estreito, com
+ações de largura total (alvo de toque); menu quebra em duas linhas.
+- **Acessibilidade:** Lighthouse 100 em acessibilidade (desktop); campos com
+  label, avisos com `role="alert"`, item ativo com `aria-current`; foco visível
+  (anel jade 2px) e login concluído só com teclado (Tab/Enter).
+- **Fidelidade:** DESIGN.md e `layout/` conferidos tela a tela.
+
+Achados e destino:
+
+| Achado | Destino |
+|---|---|
+| Pico renderizava dark mode pela preferência do sistema | Corrigido: `data-theme="light"` no `<html>` |
+| Tokens do DESIGN.md perdiam para `:scope:not([data-theme=dark])` do Pico | Corrigido: seletor com especificidade (0,2,0) |
+| Contraste do item ativo do menu em 4,4:1 | Corrigido: `--pico-primary-hover` (6,1:1) |
+| Formulários em coluna única no desktop | Corrigido: grade fluida (`auto-fit`) |
+| H1 de página sem a serifada do DESIGN.md | Corrigido |
+| Listas sem indicador de carregamento | Corrigido: `hx-indicator` + "Carregando…" |
+| `GET /logout` respondia 405 | Corrigido: a rota atende GET e POST |
+| Sem `meta description` (SEO 91) | Mantido: painel interno, não indexável |
+| "Carregar mais" refaz a consulta com `limit` maior em vez de anexar nós | Mantido e ajustado no DESIGN.md: mesmo efeito na tela, mais simples de testar |
 
 ## Estrutura
 
