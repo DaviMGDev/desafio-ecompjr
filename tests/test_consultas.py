@@ -186,3 +186,35 @@ def test_paginacao_de_movimentacoes(client, session):
 
     assert [m["id"] for m in primeira_pagina.json()] == [movimentacoes[2]["id"]]
     assert [m["id"] for m in segunda_pagina.json()] == [movimentacoes[1]["id"]]
+
+
+def test_filtros_e_paginacao_de_produtos(client):
+    categoria_a, fornecedor_a = _criar_base(client)
+    categoria_b = client.post("/categorias", json={"nome": "Limpeza"}).json()["id"]
+    fornecedor_b = client.post(
+        "/fornecedores",
+        json={
+            "nome": "Fornecedor Dois",
+            "cnpj": "04.252.011/0001-10",
+            "telefone": "1",
+            "email": "dois@exemplo.com",
+        },
+    ).json()["id"]
+
+    alfa = _criar_produto(client, categoria_a, fornecedor_a, "SKU-A")
+    beta = _criar_produto(client, categoria_a, fornecedor_b, "SKU-B")
+    gama = _criar_produto(client, categoria_b, fornecedor_a, "SKU-C")
+
+    por_nome = client.get("/produtos", params={"nome": "sku-b"})
+    assert [p["id"] for p in por_nome.json()] == [beta["id"]]
+
+    por_categoria = client.get("/produtos", params={"categoria_id": categoria_a})
+    assert [p["id"] for p in por_categoria.json()] == [alfa["id"], beta["id"]]
+
+    por_fornecedor = client.get("/produtos", params={"fornecedor_id": fornecedor_a})
+    assert [p["id"] for p in por_fornecedor.json()] == [alfa["id"], gama["id"]]
+
+    pagina = client.get("/produtos", params={"limit": 2, "offset": 1})
+    assert [p["id"] for p in pagina.json()] == [beta["id"], gama["id"]]
+
+    assert client.get("/produtos", params={"limit": 0}).status_code == 422
