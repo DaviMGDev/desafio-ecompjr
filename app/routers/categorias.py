@@ -1,8 +1,8 @@
 """Rotas de categorias."""
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, exigir_admin
 from app.models import Categoria
 from app.schemas.categoria import CategoriaCreate, CategoriaRead, CategoriaUpdate
 from app.services import categorias
@@ -10,7 +10,12 @@ from app.services import categorias
 router = APIRouter(prefix="/categorias", tags=["categorias"])
 
 
-@router.post("", response_model=CategoriaRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=CategoriaRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(exigir_admin)],
+)
 def criar_categoria(dados: CategoriaCreate, session: SessionDep) -> Categoria:
     """Cria uma categoria com nome único (ignorando caixa)."""
     return categorias.criar(session, dados)
@@ -32,7 +37,11 @@ def obter_categoria(categoria_id: int, session: SessionDep) -> Categoria:
     return categorias.obter(session, categoria_id)
 
 
-@router.put("/{categoria_id}", response_model=CategoriaRead)
+@router.put(
+    "/{categoria_id}",
+    response_model=CategoriaRead,
+    dependencies=[Depends(exigir_admin)],
+)
 def atualizar_categoria(
     categoria_id: int, dados: CategoriaUpdate, session: SessionDep
 ) -> Categoria:
@@ -40,7 +49,11 @@ def atualizar_categoria(
     return categorias.atualizar(session, categoria_id, dados)
 
 
-@router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{categoria_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(exigir_admin)],
+)
 def excluir_categoria(categoria_id: int, session: SessionDep) -> None:
     """Exclui uma categoria sem produtos vinculados."""
     categorias.excluir(session, categoria_id)

@@ -2,9 +2,9 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, exigir_admin
 from app.models import Movimentacao, TipoMovimentacao
 from app.schemas.movimentacao import MovimentacaoCreate, MovimentacaoRead
 from app.services import movimentacoes
@@ -12,7 +12,12 @@ from app.services import movimentacoes
 router = APIRouter(prefix="/movimentacoes", tags=["movimentacoes"])
 
 
-@router.post("", response_model=MovimentacaoRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=MovimentacaoRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(exigir_admin)],
+)
 def criar_movimentacao(dados: MovimentacaoCreate, session: SessionDep) -> Movimentacao:
     """Registra entrada/saída e atualiza o saldo na mesma transação."""
     return movimentacoes.criar(session, dados)

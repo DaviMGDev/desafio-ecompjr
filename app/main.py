@@ -1,7 +1,8 @@
 """Aplicação FastAPI da API de Gerenciamento de Estoque."""
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
+from app.api.deps import usuario_atual
 from app.api.errors import registrar_handlers
 from app.routers import auth as rotas_auth
 from app.routers import categorias as rotas_categorias
@@ -20,10 +21,10 @@ app = FastAPI(
 
 registrar_handlers(app)
 app.include_router(rotas_auth.router)
-app.include_router(rotas_fornecedores.router)
-app.include_router(rotas_categorias.router)
-app.include_router(rotas_produtos.router)
-app.include_router(rotas_movimentacoes.router)
+app.include_router(rotas_fornecedores.router, dependencies=[Depends(usuario_atual)])
+app.include_router(rotas_categorias.router, dependencies=[Depends(usuario_atual)])
+app.include_router(rotas_produtos.router, dependencies=[Depends(usuario_atual)])
+app.include_router(rotas_movimentacoes.router, dependencies=[Depends(usuario_atual)])
 
 
 @app.get("/health", tags=["infra"], summary="Verifica se a API está no ar")

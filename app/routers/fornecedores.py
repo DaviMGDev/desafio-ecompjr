@@ -1,8 +1,8 @@
 """Rotas de fornecedores."""
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, exigir_admin
 from app.models import Fornecedor
 from app.schemas.fornecedor import FornecedorCreate, FornecedorRead, FornecedorUpdate
 from app.services import fornecedores
@@ -10,7 +10,12 @@ from app.services import fornecedores
 router = APIRouter(prefix="/fornecedores", tags=["fornecedores"])
 
 
-@router.post("", response_model=FornecedorRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=FornecedorRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(exigir_admin)],
+)
 def criar_fornecedor(dados: FornecedorCreate, session: SessionDep) -> Fornecedor:
     """Cria um fornecedor; CNPJ e e-mail precisam ser únicos."""
     return fornecedores.criar(session, dados)
@@ -33,7 +38,11 @@ def obter_fornecedor(fornecedor_id: int, session: SessionDep) -> Fornecedor:
     return fornecedores.obter(session, fornecedor_id)
 
 
-@router.put("/{fornecedor_id}", response_model=FornecedorRead)
+@router.put(
+    "/{fornecedor_id}",
+    response_model=FornecedorRead,
+    dependencies=[Depends(exigir_admin)],
+)
 def atualizar_fornecedor(
     fornecedor_id: int, dados: FornecedorUpdate, session: SessionDep
 ) -> Fornecedor:
@@ -41,7 +50,11 @@ def atualizar_fornecedor(
     return fornecedores.atualizar(session, fornecedor_id, dados)
 
 
-@router.delete("/{fornecedor_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{fornecedor_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(exigir_admin)],
+)
 def excluir_fornecedor(fornecedor_id: int, session: SessionDep) -> None:
     """Exclui um fornecedor sem produtos vinculados."""
     fornecedores.excluir(session, fornecedor_id)

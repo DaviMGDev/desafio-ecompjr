@@ -1,8 +1,8 @@
 """Rotas de produtos."""
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, exigir_admin
 from app.models import Produto
 from app.schemas.produto import ProdutoCreate, ProdutoRead, ProdutoUpdate
 from app.services import produtos
@@ -10,7 +10,12 @@ from app.services import produtos
 router = APIRouter(prefix="/produtos", tags=["produtos"])
 
 
-@router.post("", response_model=ProdutoRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ProdutoRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(exigir_admin)],
+)
 def criar_produto(dados: ProdutoCreate, session: SessionDep) -> Produto:
     """Cria um produto; o saldo nasce zerado e só muda por movimentação."""
     return produtos.criar(session, dados)
@@ -52,13 +57,19 @@ def obter_produto(produto_id: int, session: SessionDep) -> Produto:
     return produtos.obter(session, produto_id)
 
 
-@router.put("/{produto_id}", response_model=ProdutoRead)
+@router.put(
+    "/{produto_id}", response_model=ProdutoRead, dependencies=[Depends(exigir_admin)]
+)
 def atualizar_produto(produto_id: int, dados: ProdutoUpdate, session: SessionDep) -> Produto:
     """Atualiza um produto; o saldo não é aceito no payload (só movimentação)."""
     return produtos.atualizar(session, produto_id, dados)
 
 
-@router.delete("/{produto_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{produto_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(exigir_admin)],
+)
 def excluir_produto(produto_id: int, session: SessionDep) -> None:
     """Exclui um produto sem movimentações registradas."""
     produtos.excluir(session, produto_id)
