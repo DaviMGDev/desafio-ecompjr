@@ -1,18 +1,23 @@
 """Rotas do painel — uma tela por módulo, todas atrás do login.
 
 Cada módulo expõe um `ar = APIRouter()` que o `frontend/main.py` monta no app.
-Rotas de escrita repetem `exigir_admin`: a UI esconde os controles do leitor,
-mas a rota não confia no cliente (a API também responde 403).
+Rotas de escrita repetem a checagem de perfil: a UI esconde os controles do
+leitor, mas a rota não confia no cliente (a API também responde 403).
 """
 
-from fasthtml.common import FtResponse
+from fasthtml.common import FtResponse, Redirect
 
 from frontend import sessao
-from frontend.componentes import alerta
+
+SEM_PERMISSAO = "Perfil sem permissão de escrita."
 
 
-def proibido_para_leitor(sess):
-    """Resposta 403 quando um leitor força uma rota de escrita."""
-    if sessao.eh_admin(sess):
-        return None
-    return FtResponse(alerta("erro", "Perfil sem permissão de escrita."), status_code=403)
+def redirecionar_ao_login(sess):
+    """Limpa a sessão local e volta ao login (a API recusou o token)."""
+    sessao.sair(sess)
+    return Redirect("/login")
+
+
+def resposta_403(conteudo):
+    """403 com a região da tela renderizada, para o leitor não perder a página."""
+    return FtResponse(conteudo, status_code=403)

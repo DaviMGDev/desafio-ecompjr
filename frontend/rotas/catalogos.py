@@ -33,9 +33,7 @@ def opcoes_fornecedores(sess) -> list[tuple[str, str]]:
 
 def opcoes_produtos(sess) -> list[tuple[str, str]]:
     """Produtos no formato `(id, nome)` para selects e mapas de nome."""
-    status, corpo = api.listar_produtos(
-        sessao.token_da_sessao(sess), limit=LIMITE_OPCOES, offset=0
-    )
+    status, corpo = api.listar_produtos(sessao.token_da_sessao(sess), limit=LIMITE_OPCOES, offset=0)
     if status != 200:
         return []
     return [(str(item["id"]), item["nome"]) for item in corpo]
