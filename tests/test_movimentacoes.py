@@ -132,3 +132,24 @@ def test_fornecedor_e_registrado_na_movimentacao(client, session):
     registrada = session.get(Movimentacao, resposta.json()["id"])
     assert registrada is not None
     assert registrada.fornecedor_id == fornecedor["id"]
+
+
+def test_leitura_de_movimentacao_por_id(client):
+    _criar_produto(client, saldo=3)
+    movimentacao = client.get("/movimentacoes").json()[0]
+
+    resposta = client.get(f"/movimentacoes/{movimentacao['id']}")
+
+    assert resposta.status_code == 200
+    assert resposta.json()["id"] == movimentacao["id"]
+    assert client.get("/movimentacoes/999999999").status_code == 404
+
+
+def test_movimentacao_nao_tem_rotas_de_escrita(client):
+    _criar_produto(client, saldo=3)
+    movimentacao = client.get("/movimentacoes").json()[0]
+
+    assert client.put(f"/movimentacoes/{movimentacao['id']}", json={}).status_code == 405
+    assert client.patch(f"/movimentacoes/{movimentacao['id']}", json={}).status_code == 405
+    assert client.delete(f"/movimentacoes/{movimentacao['id']}").status_code == 405
+    assert client.get(f"/movimentacoes/{movimentacao['id']}").status_code == 200
