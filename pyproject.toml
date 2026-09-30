@@ -22,6 +22,11 @@ dev = [
     "pytest-randomly>=5.0.0",
     "ruff>=0.6",
 ]
+# Grupo opcional do front-end (ADR-0015): não entra no requirements.txt gerado
+# nem no `uv sync` padrão; a UI sobe com `uv sync --group frontend`.
+frontend = [
+    "python-fasthtml>=0.14",
+]
 
 [tool.ruff]
 line-length = 100
