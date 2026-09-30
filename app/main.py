@@ -2,6 +2,8 @@
 
 from fastapi import FastAPI
 
+from app.api.errors import registrar_handlers
+
 app = FastAPI(
     title="API de Gerenciamento de Estoque",
     version="0.1.0",
@@ -10,6 +12,8 @@ app = FastAPI(
         "categorias, produtos e movimentações de estoque."
     ),
 )
+
+registrar_handlers(app)
 
 
 @app.get("/health", tags=["infra"], summary="Verifica se a API está no ar")
