@@ -1,5 +1,7 @@
 """Regras de negócio de movimentações de estoque."""
 
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -12,11 +14,31 @@ from app.schemas.movimentacao import MovimentacaoCreate
 _MENSAGENS_DE_CONFLITO = {"produto_id": "Movimentação inválida para o produto"}
 
 
-def listar(session: Session, *, limit: int, offset: int) -> list[Movimentacao]:
-    """Lista o histórico, mais recente primeiro."""
+def listar(
+    session: Session,
+    *,
+    limit: int,
+    offset: int,
+    produto_id: int | None = None,
+    tipo: TipoMovimentacao | None = None,
+    fornecedor_id: int | None = None,
+    data_inicio: datetime | None = None,
+    data_fim: datetime | None = None,
+) -> list[Movimentacao]:
+    """Lista o histórico mais recente primeiro, com filtros opcionais (ADR-0007)."""
+    consulta = select(Movimentacao)
+    if produto_id is not None:
+        consulta = consulta.where(Movimentacao.produto_id == produto_id)
+    if tipo is not None:
+        consulta = consulta.where(Movimentacao.tipo == tipo)
+    if fornecedor_id is not None:
+        consulta = consulta.where(Movimentacao.fornecedor_id == fornecedor_id)
+    if data_inicio is not None:
+        consulta = consulta.where(Movimentacao.data >= data_inicio)
+    if data_fim is not None:
+        consulta = consulta.where(Movimentacao.data <= data_fim)
     consulta = (
-        select(Movimentacao)
-        .order_by(Movimentacao.data.desc(), Movimentacao.id.desc())
+        consulta.order_by(Movimentacao.data.desc(), Movimentacao.id.desc())
         .limit(limit)
         .offset(offset)
     )

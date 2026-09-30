@@ -1,9 +1,11 @@
 """Rotas de movimentações — imutáveis: somente criação e leitura (ADR-0006)."""
 
-from fastapi import APIRouter, Query, status
+from datetime import datetime
+
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.deps import SessionDep
-from app.models import Movimentacao
+from app.models import Movimentacao, TipoMovimentacao
 from app.schemas.movimentacao import MovimentacaoCreate, MovimentacaoRead
 from app.services import movimentacoes
 
@@ -21,9 +23,28 @@ def listar_movimentacoes(
     session: SessionDep,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    produto_id: int | None = Query(default=None),
+    tipo: TipoMovimentacao | None = Query(default=None),
+    fornecedor_id: int | None = Query(default=None),
+    data_inicio: datetime | None = Query(default=None, description="Inclusivo, ISO 8601"),
+    data_fim: datetime | None = Query(default=None, description="Inclusivo, ISO 8601"),
 ) -> list[Movimentacao]:
-    """Lista o histórico de movimentações, mais recentes primeiro."""
-    return movimentacoes.listar(session, limit=limit, offset=offset)
+    """Lista o histórico com filtros de produto, tipo, fornecedor e período."""
+    if data_inicio is not None and data_fim is not None and data_inicio > data_fim:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="data_inicio não pode ser maior que data_fim",
+        )
+    return movimentacoes.listar(
+        session,
+        limit=limit,
+        offset=offset,
+        produto_id=produto_id,
+        tipo=tipo,
+        fornecedor_id=fornecedor_id,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+    )
 
 
 @router.get("/{movimentacao_id}", response_model=MovimentacaoRead)
