@@ -28,8 +28,9 @@ Comportamentos acordados vivem em `specs/features/*.feature` (Gherkin pt-BR).
 Escopo: CRUD de fornecedores, categorias e produtos; movimentações de estoque
 imutáveis com atualização transacional do saldo; consultas avançadas de estoque
 mínimo e filtros de movimentação; erros padronizados; OpenAPI + README. Fora de
-escopo: front-end e multiusuário complexo (§ 3.a cobre apenas JWT + perfis como
-diferencial).
+escopo do enunciado: front-end e multiusuário complexo (§ 3.a cobre apenas JWT +
+perfis como diferencial). O front-end foi construído depois como extra (D10–D12):
+consome a API como cliente externo e não altera este serviço.
 
 Barema (§ 6): CRUD 1, consultas 1, erros 1, documentação 1, commits 2, qualidade
 2, diferenciais até 2.
@@ -241,3 +242,6 @@ conforme for implementada (fluxo do AGENTS.md):
 | D7 | período `datetime` ISO 8601 inclusivo; paginação limit/offset           | precisão de fuso vs usabilidade de date-only                           |
 | D8 | diferenciais: concorrência → testes/CI → auth (auth corta primeiro)     | pontos extras vs risco de prazo                                        |
 | D9 | camadas enxuto, SQLAlchemy sync, Pydantic v2                            | clareza/defesa vs DDD/async                                            |
+| D10 | front-end FastHTML em serviço ASGI separado consumindo a API; JWT em sessão assinada | backend intocado e contrato exercitado vs. um processo extra (ADR-0014) |
+| D11 | dependências do front-end em grupo opcional `frontend` no pyproject raiz | um lockfile/um ambiente vs. job de CI com `--group frontend` (ADR-0015) |
+| D12 | seed do leitor por `LEITOR_EMAIL`/`LEITOR_PASSWORD` para a demo do 403 | demo ao vivo vs. pequeno diff no seed/serviço, com ADR (0016)           |
