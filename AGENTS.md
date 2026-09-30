@@ -13,7 +13,8 @@
 | Caminho | Papel |
 |---|---|
 | `desafio-tecnico-backend-prosel-2026.2/desafio-tecnico-backend-prosel-2026.2.md` | Enunciado oficial (**read-only** — nunca editar) |
-| `specs/` | Especificações do projeto (a criar pelo candidato; detalhes de domínio, ADRs e registro de decisões) |
+| `specs/` | Especificações do projeto (a criar pelo candidato; domínio, features BDD e decisões em prosa) |
+| `docs/adr/` | ADRs — decisões técnicas explicáveis na defesa (ver *Registro de decisões (ADR)*) |
 | `README.md` | Documentação de entrega (setup, rotas, exemplos) — ainda não existe |
 
 Em caso de conflito entre um `specs/*` e o enunciado, o **enunciado vence**.
@@ -154,11 +155,31 @@ comportamento esperado do agente:
   (transação, lock, política de delete) e as alternativas descartadas.
 - **Não produza código inauditável.** Se um trecho não pode ser reescrito de memória
   pelo usuário, ele não deve entrar no repositório sem revisão e explicação.
-- **Registre decisões** em `docs/adr/` à medida que forem tomadas, para a defesa.
+- **Registre decisões** em `docs/adr/` à medida que forem tomadas, para a defesa — fluxo completo na seção *Registro de decisões (ADR)*.
 - Ao escolher entre duas abordagens defensáveis, apresente o trade-off e deixe o
   usuário decidir em vez de escolher silenciosamente.
 - Prefira passos pequenos e verificáveis (implementar → rodar → commitar) a despejar
   vários arquivos de uma vez.
+
+## Registro de decisões (ADR)
+
+`docs/adr/` é o diário de decisões que sustentam a defesa técnica (§ 6). O agente
+mantém esse diretório atualizado:
+
+- **Detecte a decisão.** Toda escolha entre alternativas defensáveis — modelagem,
+  `ON DELETE`, transação/lock, estratégia de erro, autenticação, layout de pastas,
+  ferramental — é candidata a ADR.
+- **Pergunte antes de criar.** O agente nunca cria um ADR silenciosamente:
+  apresenta a proposta (contexto, opções, recomendação, consequências) e aguarda
+  confirmação explícita do usuário.
+- **Formato.** `docs/adr/NNNN-titulo-curto-em-kebab.md`, numeração sequencial, em
+  pt-BR: título (`# ADR-000N: ...`), **Data**, **Status** (`proposto` | `aceito` |
+  `substituído por ADR-XXXX`), **Contexto**, **Decisão**, **Alternativas
+  consideradas**, **Consequências**.
+- **Decisão mudou?** Não reescreva um ADR aceito: crie um novo ADR que o substitui
+  e atualize o status do antigo.
+- **Sincronize.** A decisão aceita deve aparecer em `specs/SPEC.md` (seção
+  Decisions) e, quando não óbvia, em um comentário no código (§ 2.g).
 
 ## Definition of Done
 
