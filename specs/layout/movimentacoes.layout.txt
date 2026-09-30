@@ -1,0 +1,61 @@
+# movimentacoes.layout.txt — LAYOUT v1
+# Meta: histórico imutável — não existe editar nem excluir em lugar nenhum.
+# Meta: os recortes são os da API: produto, tipo, fornecedor e período inclusivo.
+
+(header)
+  [愚公移山 Variedades](text:wordmark)
+  (row:menu)
+    [Produtos](link produtos)
+    [Estoque baixo](link estoque-baixo)
+    [Movimentações](link movimentacoes)
+    [Fornecedores](link fornecedores)
+    [Categorias](link categorias)
+  (row:conta)
+    [Administrador](text:usuario)
+    [Sair](button:ghost sair)
+
+Movimentações
+
+(form:filtros)
+  [Produto](select produtos)
+  [Tipo](select tipo)
+  [Fornecedor](select fornecedores)
+  [De](input date)
+  [Até](input date)
+  [Filtrar](button:secondary)
+  [Limpar](link movimentacoes)
+  # primeira opção dos selects de filtro: "Todos"
+
+# registrar é a única escrita desta tela
+(card:form)
+  [Registrar movimentação](text:heading)
+  (form:movimentacao)
+    [Produto](select produtos required)
+    [Saldo atual: 10](text:saldo)
+    [Tipo](select tipo required)
+    [Quantidade](input number min=1 required)
+    [Fornecedor](select fornecedores)
+    [Observação](textarea rows=3 maxlength=255)
+    [Registrar](button:primary)
+  # o saldo acompanha o produto selecionado e é atualizado após cada registro
+  # 409: alerta com o `detail` da API ("Saldo insuficiente para a saída")
+  # 422: mensagens por campo; período invertido chega pelo envelope
+  # leitor: este formulário não existe (não é desabilitado)
+
+(card:historico)
+  [Histórico](text:heading)
+  # cada item repete este bloco por movimentação; os valores são exemplares
+  (grid:movimentacoes)
+    (row:movimentacao)
+      [30/09/2026 12:00](text:mono)
+      [Entrada](badge:entrada)
+      [10](text:strong)
+      [Chá preto 500g](text)
+      [Distribuidora Aurora](text:muted)
+      [Reposição de setembro](text:muted)
+  # estados da lista
+  (card:empty)
+    Nenhuma movimentação no período
+  [Carregando…](text:loading)
+  (alert:error)
+  [Carregar mais](button:secondary)

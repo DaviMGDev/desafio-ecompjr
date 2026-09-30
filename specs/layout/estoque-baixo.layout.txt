@@ -1,0 +1,40 @@
+# estoque-baixo.layout.txt — LAYOUT v1
+# Meta: consulta avançada — produtos com saldo no/abaixo do mínimo, ordenados
+# por criticidade pela API.
+
+(header)
+  [愚公移山 Variedades](text:wordmark)
+  (row:menu)
+    [Produtos](link produtos)
+    [Estoque baixo](link estoque-baixo)
+    [Movimentações](link movimentacoes)
+    [Fornecedores](link fornecedores)
+    [Categorias](link categorias)
+  (row:conta)
+    [Administrador](text:usuario)
+    [Sair](button:ghost sair)
+
+Estoque baixo
+Produtos no ou abaixo do estoque mínimo.
+
+# resumo; aparece só quando há itens
+(card:resumo)
+  [3 produtos precisam de reposição](alert:critico)
+
+(card:lista)
+  # cada item repete este bloco por produto crítico; os valores são exemplares
+  (grid:produtos-criticos)
+    (row:produto-critico)
+      [Chá preto 500g](text:strong)
+      [SKU CHA-500](text:mono)
+      [Estoque: 3](text:strong)
+      [Mínimo: 5](text:mono)
+      [Crítico](badge:critico)
+      [Registrar entrada](button:secondary small)
+  # estados da lista
+  (card:empty)
+    Nenhum produto abaixo do mínimo
+  [Carregando…](text:loading)
+  (alert:error)
+  [Carregar mais](button:secondary)
+  # "Registrar entrada" leva a movimentações com o produto pré-selecionado

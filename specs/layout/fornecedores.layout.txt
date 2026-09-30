@@ -1,0 +1,55 @@
+# fornecedores.layout.txt — LAYOUT v1
+# Meta: CRUD com lista paginada; exclusão com produtos vinculados responde 409.
+
+(header)
+  [愚公移山 Variedades](text:wordmark)
+  (row:menu)
+    [Produtos](link produtos)
+    [Estoque baixo](link estoque-baixo)
+    [Movimentações](link movimentacoes)
+    [Fornecedores](link fornecedores)
+    [Categorias](link categorias)
+  (row:conta)
+    [Administrador](text:usuario)
+    [Sair](button:ghost sair)
+
+Fornecedores
+
+# a API filtra por trecho do nome
+(form:filtros)
+  [Buscar por nome](input search)
+  [Filtrar](button:secondary)
+  [Limpar](link fornecedores)
+
+# o mesmo cartão serve para criar e para editar; só o título muda
+(card:form)
+  [Novo fornecedor](text:heading)
+  (form:fornecedor)
+    [Nome](input required maxlength=120)
+    [CNPJ](input text required placeholder=00.000.000/0000-00)
+    [Telefone](input tel required maxlength=20)
+    [E-mail](input email required)
+    [Salvar](button:primary)
+    [Cancelar](button:ghost)
+  # CNPJ aceita máscara: a API normaliza e valida os dígitos
+  # 422: uma mensagem por campo; 409: alerta com o `detail` ("CNPJ já cadastrado")
+  # leitor: este formulário não existe (não é desabilitado)
+
+(card:lista)
+  [Fornecedores cadastrados](text:heading)
+  # cada item repete este bloco por fornecedor; os valores são exemplares
+  (grid:fornecedores)
+    (row:fornecedor)
+      [Distribuidora Aurora](text:strong)
+      [CNPJ 11222333000181](text:mono)
+      [75999990000](text:mono)
+      [contato@aurora.com](text:muted)
+      [Editar](button:secondary small)
+      [Excluir](button:danger small)
+  # estados da lista
+  (card:empty)
+    Nenhum fornecedor cadastrado
+  [Carregando…](text:loading)
+  (alert:error)
+  [Carregar mais](button:secondary)
+  # exclusão pede confirmação; 409 mostra o `detail` ("Fornecedor possui produtos vinculados")

@@ -1,0 +1,15 @@
+# login.layout.txt — LAYOUT v1
+# Meta: tela deslogada, sem navegação. O painel só aparece depois do login.
+# Meta: erro de credencial (401) vira alerta acima do formulário, com o `detail`
+# da API palavra por palavra; carregando desabilita o botão Entrar.
+
+愚公移山 Variedades
+Painel de estoque
+
+# aparece quando o POST /auth/login devolve 401
+(alert:error)
+
+(form:login)
+  [E-mail](input email required autocomplete=username)
+  [Senha](input password required autocomplete=current-password)
+  [Entrar](button:primary full-width)

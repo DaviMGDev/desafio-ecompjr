@@ -1,0 +1,43 @@
+# categorias.layout.txt — LAYOUT v1
+# Meta: CRUD simples; nome único (sem diferenciar caixa) responde 409.
+# Meta: a API não tem filtro por nome — a lista é curta e cabe na página.
+
+(header)
+  [愚公移山 Variedades](text:wordmark)
+  (row:menu)
+    [Produtos](link produtos)
+    [Estoque baixo](link estoque-baixo)
+    [Movimentações](link movimentacoes)
+    [Fornecedores](link fornecedores)
+    [Categorias](link categorias)
+  (row:conta)
+    [Administrador](text:usuario)
+    [Sair](button:ghost sair)
+
+Categorias
+
+# o mesmo cartão serve para criar e para editar; só o título muda
+(card:form)
+  [Nova categoria](text:heading)
+  (form:categoria)
+    [Nome](input required maxlength=120)
+    [Salvar](button:primary)
+    [Cancelar](button:ghost)
+  # 422: mensagem por campo; 409: alerta com o `detail` ("Categoria já cadastrada")
+  # leitor: este formulário não existe (não é desabilitado)
+
+(card:lista)
+  [Categorias cadastradas](text:heading)
+  # cada item repete este bloco por categoria; os valores são exemplares
+  (grid:categorias)
+    (row:categoria)
+      [Bebidas](text:strong)
+      [Editar](button:secondary small)
+      [Excluir](button:danger small)
+  # estados da lista
+  (card:empty)
+    Nenhuma categoria cadastrada
+  [Carregando…](text:loading)
+  (alert:error)
+  [Carregar mais](button:secondary)
+  # exclusão pede confirmação; 409 mostra o `detail` ("Categoria possui produtos vinculados")

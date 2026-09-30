@@ -1,0 +1,64 @@
+# produtos.layout.txt — LAYOUT v1
+# Meta: lista paginada com "carregar mais" (a API não expõe contagem total).
+# Meta: saldo é somente leitura — só muda por movimentação.
+
+(header)
+  [愚公移山 Variedades](text:wordmark)
+  (row:menu)
+    [Produtos](link produtos)
+    [Estoque baixo](link estoque-baixo)
+    [Movimentações](link movimentacoes)
+    [Fornecedores](link fornecedores)
+    [Categorias](link categorias)
+  (row:conta)
+    [Administrador](text:usuario)
+    [Sair](button:ghost sair)
+
+Produtos
+
+# filtros da API: nome (trecho), categoria e fornecedor
+(form:filtros)
+  [Buscar por nome](input search)
+  [Categoria](select categorias)
+  [Fornecedor](select fornecedores)
+  [Filtrar](button:secondary)
+  [Limpar](link produtos)
+  # primeira opção dos selects de filtro: "Todas" / "Todos"
+
+# o mesmo cartão serve para criar e para editar; só o título muda
+(card:form)
+  [Novo produto](text:heading)
+  (form:produto)
+    [Nome](input required maxlength=120)
+    [SKU](input required maxlength=64)
+    [Preço de custo](input number step=0.01 required)
+    [Preço de venda](input number step=0.01 required)
+    [Quantidade mínima](input number min=0)
+    [Categoria](select categorias required)
+    [Fornecedor](select fornecedores required)
+    [Salvar](button:primary)
+    [Cancelar](button:ghost)
+  # 422: uma mensagem por campo, derivada de `loc` e `msg` do envelope
+  # 409: alerta com o `detail` da API (ex.: "SKU já cadastrado")
+  # leitor: este formulário não existe (não é desabilitado)
+
+(card:lista)
+  [Produtos cadastrados](text:heading)
+  # cada item repete este bloco por produto; os valores são exemplares
+  (grid:produtos)
+    (row:produto)
+      [Chá preto 500g](text:strong)
+      [SKU CHA-500](text:mono)
+      [Categoria: Bebidas](text:muted)
+      [Fornecedor: Distribuidora Aurora](text:muted)
+      [Estoque: 10](text:strong)
+      [Mínimo: 5](text:mono)
+      [Editar](button:secondary small)
+      [Excluir](button:danger small)
+  # estados da lista
+  (card:empty)
+    Nenhum produto cadastrado
+  [Carregando…](text:loading)
+  (alert:error)
+  [Carregar mais](button:secondary)
+  # exclusão pede confirmação; 409 mostra o `detail` ("Produto possui movimentações registradas")

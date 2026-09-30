@@ -25,3 +25,7 @@ updated: "2026-09-30"
   dependências em grupo opcional `frontend`, leitor semeado por ambiente,
   paginação "carregar mais", nenhum endpoint novo. Decisões arquiteturais nos
   `docs/adr/0014..0016` (D10–D12 no SPEC).
+- `specs/DESIGN.md` (sistema visual do painel, com `design.md lint` limpo) e
+  `specs/layout/*.layout.txt` (seis telas, parse check exit 0) — contrato do
+  front-end registrado antes do código; a subpasta `layout/` existe porque o
+  formato LAYOUT v1 exige um arquivo por tela.
