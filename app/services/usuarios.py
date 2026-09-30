@@ -13,21 +13,24 @@ def obter_por_email(session: Session, email: str) -> Usuario | None:
     return session.scalar(select(Usuario).where(Usuario.email == email.strip().lower()))
 
 
-def criar_admin_se_nao_existir(session: Session, email: str, senha: str) -> tuple[Usuario, bool]:
-    """Cria o admin semeado a partir do ambiente; idempotente.
+def criar_usuario_se_nao_existir(
+    session: Session, *, nome: str, email: str, senha: str, perfil: PerfilUsuario
+) -> tuple[Usuario, bool]:
+    """Cria um usuário idempotente por e-mail, a partir do ambiente (ADR-0016).
 
-    Devolve `(usuario, criado)` — sem credenciais no repositório, conforme o
-    fluxo de seed documentado no README.
+    Devolve `(usuario, criado)` — sem credenciais no repositório. Se o e-mail já
+    existir, o registro é mantido como está (perfil inclusive); o seed roda a
+    cada deploy sem duplicar ninguém.
     """
     existente = obter_por_email(session, email)
     if existente is not None:
         return existente, False
 
     usuario = Usuario(
-        nome="Administrador",
+        nome=nome,
         email=email.strip().lower(),
         senha_hash=gerar_hash(senha),
-        perfil=PerfilUsuario.ADMIN,
+        perfil=perfil,
     )
     session.add(usuario)
     session.commit()

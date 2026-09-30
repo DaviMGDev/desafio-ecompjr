@@ -2,11 +2,17 @@
 
 from app.core.seguranca import ler_token
 from app.models import PerfilUsuario
-from app.services.usuarios import criar_admin_se_nao_existir
+from app.services.usuarios import criar_usuario_se_nao_existir
 
 
 def test_login_com_credenciais_validas_retorna_token_com_perfil(client, session):
-    usuario, _ = criar_admin_se_nao_existir(session, "admin@exemplo.com", "senha-forte")
+    usuario, _ = criar_usuario_se_nao_existir(
+        session,
+        nome="Administrador",
+        email="admin@exemplo.com",
+        senha="senha-forte",
+        perfil=PerfilUsuario.ADMIN,
+    )
 
     resposta = client.post(
         "/auth/login", json={"email": "admin@exemplo.com", "senha": "senha-forte"}
@@ -21,7 +27,13 @@ def test_login_com_credenciais_validas_retorna_token_com_perfil(client, session)
 
 
 def test_login_com_senha_incorreta_retorna_401(client, session):
-    criar_admin_se_nao_existir(session, "admin@exemplo.com", "senha-forte")
+    criar_usuario_se_nao_existir(
+        session,
+        nome="Administrador",
+        email="admin@exemplo.com",
+        senha="senha-forte",
+        perfil=PerfilUsuario.ADMIN,
+    )
 
     resposta = client.post(
         "/auth/login", json={"email": "admin@exemplo.com", "senha": "senha-errada"}
@@ -50,9 +62,7 @@ def test_rota_protegida_sem_token_retorna_401(client_sem_auth):
 
 
 def test_rota_protegida_com_token_invalido_retorna_401(client_sem_auth):
-    resposta = client_sem_auth.get(
-        "/produtos", headers={"Authorization": "Bearer token-invalido"}
-    )
+    resposta = client_sem_auth.get("/produtos", headers={"Authorization": "Bearer token-invalido"})
 
     assert resposta.status_code == 401
 

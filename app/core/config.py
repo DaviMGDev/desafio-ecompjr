@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # Admin semeado por `python -m app.seed`; sem credenciais reais no repo.
     admin_email: str | None = None
     admin_password: str | None = None
+    # Leitor semeado pelo mesmo comando, para demonstrar o 403 (ADR-0016).
+    leitor_email: str | None = None
+    leitor_password: str | None = None
 
 
 settings = Settings()
