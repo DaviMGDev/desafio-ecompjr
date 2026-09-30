@@ -1,0 +1,332 @@
+/* Painel de estoque — tokens de `specs/DESIGN.md` traduzidos para o Pico CSS.
+   Tema claro fixo, sem build: este arquivo é servido como está. */
+
+:root {
+  --pico-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pico-font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pico-font-size: 100%;
+  --pico-line-height: 1.55;
+  --pico-border-radius: 10px;
+
+  --pico-primary: #0f766e;
+  --pico-primary-background: #0f766e;
+  --pico-primary-border: #0f766e;
+  --pico-primary-hover: #115e59;
+  --pico-primary-hover-background: #115e59;
+  --pico-primary-hover-border: #115e59;
+  --pico-primary-focus: rgba(15, 118, 110, 0.25);
+  --pico-primary-inverse: #fff;
+  --pico-primary-underline: rgba(15, 118, 110, 0.5);
+
+  --pico-background-color: #faf9f6;
+  --pico-color: #1c1917;
+  --pico-h1-color: #1c1917;
+  --pico-h2-color: #1c1917;
+  --pico-h3-color: #1c1917;
+  --pico-muted-color: #57534e;
+  --pico-muted-border-color: #e7e5e4;
+  --pico-card-background-color: #fff;
+  --pico-card-border-color: #e7e5e4;
+  --pico-card-box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
+  --pico-form-element-background-color: #fff;
+  --pico-form-element-border-color: #e7e5e4;
+  --pico-form-element-color: #1c1917;
+  --pico-form-element-placeholder-color: #a8a29e;
+  --pico-form-element-active-border-color: #0f766e;
+  --pico-form-element-focus-color: rgba(15, 118, 110, 0.2);
+  --pico-form-element-valid-border-color: #15803d;
+  --pico-form-element-invalid-border-color: #b91c1c;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pico-primary);
+  outline-offset: 2px;
+}
+
+/* --- casca ------------------------------------------------------------- */
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.marca {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--pico-color);
+}
+
+.menu {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+}
+
+.menu a {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  color: var(--pico-muted-color);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.menu a.ativo {
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--pico-primary);
+  font-weight: 600;
+}
+
+.conta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.usuario {
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+}
+
+.form-sair {
+  margin: 0;
+}
+
+.form-sair button {
+  margin: 0;
+}
+
+.conteudo {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.conteudo-estreito {
+  max-width: 420px;
+  padding-top: 3rem;
+}
+
+.rodape {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 2rem;
+  color: var(--pico-muted-color);
+  font-size: 0.85rem;
+}
+
+/* --- login ------------------------------------------------------------- */
+
+.login-cartao {
+  background: #fff;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
+}
+
+.marca-login {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.6rem;
+}
+
+.subtitulo {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--pico-muted-color);
+}
+
+/* --- feedback ---------------------------------------------------------- */
+
+.alerta {
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0 1rem;
+  font-size: 0.9rem;
+}
+
+.alerta-erro {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.alerta-sucesso {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.alerta-critico {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.selo {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.05rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.selo-entrada {
+  background: #15803d;
+}
+
+.selo-saida {
+  background: #b91c1c;
+}
+
+.selo-critico {
+  background: #b45309;
+}
+
+.carregando {
+  color: var(--pico-muted-color);
+}
+
+/* --- formulários e listas ---------------------------------------------- */
+
+.cartao {
+  background: #fff;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
+}
+
+.cartao-titulo {
+  display: block;
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.campo {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.rotulo {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.erro-campo {
+  color: #991b1b;
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.filtros .campo {
+  margin-bottom: 0;
+}
+
+.filtros-acoes {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.lista {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+}
+
+.item-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.item-titulo {
+  font-weight: 600;
+}
+
+.item-meta {
+  color: var(--pico-muted-color);
+  font-size: 0.85rem;
+}
+
+.acoes {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.acoes button {
+  width: auto;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.vazio-caixa {
+  padding: 0.5rem 0;
+}
+
+.vazio {
+  color: var(--pico-muted-color);
+  margin: 0;
+}
+
+/* --- responsivo -------------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .topo {
+    padding: 0.75rem 1rem;
+  }
+
+  .menu {
+    order: 3;
+    width: 100%;
+  }
+
+  .acoes {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .acoes button {
+    flex: 1;
+  }
+}
