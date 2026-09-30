@@ -10,11 +10,22 @@ import httpx2
 import pytest
 from fasthtml.common import Client as ClientFastHTML
 
+from app.core.validadores import _digito_verificador
 from app.main import app as app_api
 from frontend import api as api_painel
 from frontend.main import app as app_painel
 
 HX = {"HX-Request": "1"}
+
+
+def gerar_cnpj(raiz: int) -> str:
+    """Gera um CNPJ válido a partir de uma raiz de 12 dígitos (dados de teste)."""
+    digitos = f"{raiz:012d}"
+    if len(set(digitos)) == 1:
+        digitos = f"{raiz + 1:012d}"
+    primeiro = _digito_verificador(digitos, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+    segundo = _digito_verificador(digitos + primeiro, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+    return digitos + primeiro + segundo
 
 
 @pytest.fixture()
