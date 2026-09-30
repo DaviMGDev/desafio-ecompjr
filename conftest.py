@@ -1,13 +1,53 @@
-"""Fixtures de banco isoladas por teste e clientes autenticados."""
+"""Fixtures de banco isoladas por teste e clientes autenticados.
+
+A suíte roda num banco próprio (`<DATABASE_URL>_test`, ou `TEST_DATABASE_URL` quando
+informado), criado na primeira execução: dados de desenvolvimento/demonstração não
+vazam para os testes, e os testes não tocam nesses dados. O banco derivado é
+recriado a cada sessão; o informado por variável é respeitado como está.
+"""
+
+import os
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine, make_url
+from sqlalchemy.orm import Session, sessionmaker
 
+import app.db as db
+from app.core.config import settings
 from app.core.seguranca import criar_token, gerar_hash
-from app.db import engine, get_session
+from app.db import get_session
 from app.main import app
 from app.models import Base, PerfilUsuario, Usuario
+
+
+def _preparar_banco_de_teste() -> tuple[Engine, bool]:
+    """Aponta o app para o banco da suíte; devolve `(engine, descartável)`."""
+    url = make_url(settings.database_url)
+    informada = os.getenv("TEST_DATABASE_URL")
+    url_teste = make_url(informada) if informada else url.set(database=f"{url.database}_test")
+
+    if not informada:
+        # Cria o banco irmão uma única vez (a conexão de administração precisa
+        # de AUTOCOMMIT para rodar o DDL).
+        with create_engine(
+            url.set(database="postgres"), isolation_level="AUTOCOMMIT"
+        ).connect() as conexao:
+            existe = conexao.execute(
+                text("select 1 from pg_database where datname = :nome"),
+                {"nome": url_teste.database},
+            ).first()
+            if not existe:
+                conexao.execute(text(f'create database "{url_teste.database}"'))
+
+    engine_teste = create_engine(url_teste, pool_pre_ping=True)
+    db.engine = engine_teste
+    db.SessionLocal = sessionmaker(bind=engine_teste, autoflush=False, expire_on_commit=False)
+    return engine_teste, informada is None
+
+
+engine, _BANCO_DESCARTAVEL = _preparar_banco_de_teste()
 
 # Hashes calculados uma vez por sessão de testes: o argon2 é propositalmente
 # lento e recalculá-lo a cada teste dominaria o tempo da suíte.
@@ -18,6 +58,9 @@ _HASH_LEITOR = gerar_hash("senha-leitor")
 @pytest.fixture(scope="session")
 def _schema():
     """Garante as tabelas antes da suíte, sem depender do estado do banco."""
+    if _BANCO_DESCARTAVEL:
+        # O banco derivado é nosso: recriar as tabelas mantém o schema atual.
+        Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     return None
 
