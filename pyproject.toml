@@ -1,0 +1,34 @@
+[project]
+name = "desafio-ecompjr"
+version = "0.1.0"
+description = "API de Gerenciamento de Estoque — Desafio Técnico Prosel 2026.2 (EcompJr/UEFS)"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.13",
+    "email-validator>=2.2",
+    "fastapi>=0.115",
+    "psycopg[binary]>=3.2",
+    "pwdlib[argon2]>=0.2",
+    "pydantic-settings>=2.4",
+    "pyjwt>=2.9",
+    "sqlalchemy>=2.0.30",
+    "uvicorn[standard]>=0.30",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.27",
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
