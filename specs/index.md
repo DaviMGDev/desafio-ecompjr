@@ -8,7 +8,7 @@ updated: "2026-09-30"
 
 # specs/ — Index
 
-Status do projeto: draft
+Status do projeto: active
 
 ## Nodes
 

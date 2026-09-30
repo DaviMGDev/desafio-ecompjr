@@ -15,3 +15,7 @@ updated: "2026-09-30"
   cresceu para múltiplos arquivos).
 - ADRs ficam em `docs/adr/` (fora de `specs/`) por direção explícita do projeto
   no `AGENTS.md` — desvio do default documentado aqui.
+- Implementação concluída a partir deste SPEC: CRUD com erros padronizados,
+  movimentações transacionais com lock pessimista (teste de concorrência),
+  consultas avançadas, autenticação JWT, suíte de testes, CI e README.
+  Decisões registradas em `docs/adr/0001..0013`. Status do projeto: ativo.
