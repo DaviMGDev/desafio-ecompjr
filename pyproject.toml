@@ -29,6 +29,10 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Query/Depends em defaults é o padrão idiomático do FastAPI (B008).
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Path", "fastapi.Query"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
