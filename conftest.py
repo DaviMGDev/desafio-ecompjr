@@ -55,9 +55,14 @@ _HASH_ADMIN = gerar_hash("senha-admin")
 _HASH_LEITOR = gerar_hash("senha-leitor")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def _schema():
-    """Garante as tabelas antes da suíte, sem depender do estado do banco."""
+    """Garante as tabelas antes de qualquer teste, sem depender do estado do banco.
+
+    É `autouse` de propósito: testes que falam direto com `SessionLocal` (sem a
+    fixture de sessão, como o de concorrência) não podem depender da ordem para
+    encontrar o schema criado.
+    """
     if _BANCO_DESCARTAVEL:
         # O banco derivado é nosso: recriar as tabelas mantém o schema atual.
         Base.metadata.drop_all(engine)
