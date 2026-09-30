@@ -71,8 +71,11 @@ def entrar_painel(email: str = "", senha: str = "", sess=None):
     return _tela(erro=mensagem, email=email)
 
 
-@ar("/logout", methods=["POST"])
+@ar("/logout", methods=["GET", "POST"])
 def sair_painel(sess):
-    """Limpa a sessão do painel (o token deixa de ser usado)."""
+    """Limpa a sessão do painel (o token deixa de ser usado).
+
+    GET também é atendido para quem chega pela URL; o botão usa POST.
+    """
     sessao.sair(sess)
     return Redirect("/login")

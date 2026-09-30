@@ -5,7 +5,7 @@ from typing import Any
 from fasthtml.common import H1, A, APIRouter, Div, P, Redirect, Span
 
 from frontend import api, sessao
-from frontend.componentes import alerta, botao, cartao, estado_vazio, selo, shell
+from frontend.componentes import alerta, botao, cartao, estado_vazio, indicador, selo, shell
 from frontend.rotas import redirecionar_ao_login
 from frontend.rotas.catalogos import nome_por_id, opcoes_categorias, opcoes_fornecedores
 
@@ -13,6 +13,7 @@ ar = APIRouter()
 
 LIMITE_PADRAO = 20
 LIMITE_MAXIMO = 100
+CARREGANDO = "carregando-estoque-baixo"
 
 
 def _buscar(sess, limite: int):
@@ -82,7 +83,9 @@ def _lista(
                 cls="item",
             )
         )
-    return Div(Div(*itens, cls="lista"), _carregar_mais(limite, len(produtos)))
+    return Div(
+        Div(*itens, cls="lista"), indicador(CARREGANDO), _carregar_mais(limite, len(produtos))
+    )
 
 
 def _carregar_mais(limite: int, quantidade: int):
@@ -93,6 +96,7 @@ def _carregar_mais(limite: int, quantidade: int):
         "Carregar mais",
         "secundario",
         hx_get="/estoque-baixo/lista",
+        hx_indicator=f"#{CARREGANDO}",
         hx_vals=f'{{"limite": {min(limite + LIMITE_PADRAO, LIMITE_MAXIMO)}}}',
         hx_target="#cartao-lista-estoque-baixo",
         hx_swap="outerHTML",
@@ -122,6 +126,7 @@ def _cartao_lista(
             catalogo_categorias,
             catalogo_fornecedores,
         ),
+        indicador(CARREGANDO),
         titulo="Produtos no/abaixo do mínimo",
         id_="cartao-lista-estoque-baixo",
     )

@@ -11,6 +11,7 @@ from frontend.componentes import (
     campo,
     cartao,
     estado_vazio,
+    indicador,
     select_campo,
     selo,
     shell,
@@ -21,6 +22,7 @@ from frontend.rotas.catalogos import nome_por_id, opcoes_categorias, opcoes_forn
 ar = APIRouter()
 
 REGIAO = "conteudo-produtos"
+CARREGANDO = "carregando-produtos"
 FILTROS = "filtros-produtos"
 LIMITE_PADRAO = 20
 LIMITE_MAXIMO = 100
@@ -116,11 +118,13 @@ def _form(
             cls="filtros-acoes",
         ),
         hx_include=f"#{FILTROS}",
+        hx_indicator=f"#{CARREGANDO}",
         hx_post=destino,
         hx_target=f"#{REGIAO}",
         hx_swap="outerHTML",
         method="post",
         action=destino,
+        cls="formulario",
     )
 
 
@@ -165,6 +169,7 @@ def _filtros(
         id=FILTROS,
         cls="filtros",
         hx_get="/produtos/lista",
+        hx_indicator=f"#{CARREGANDO}",
         hx_target="#cartao-lista-produtos",
         hx_swap="outerHTML",
         method="get",
@@ -233,7 +238,9 @@ def _lista(
                 cls="item",
             )
         )
-    return Div(Div(*itens, cls="lista"), _carregar_mais(limite, len(produtos)))
+    return Div(
+        Div(*itens, cls="lista"), indicador(CARREGANDO), _carregar_mais(limite, len(produtos))
+    )
 
 
 def _carregar_mais(limite: int, quantidade: int):
@@ -245,6 +252,7 @@ def _carregar_mais(limite: int, quantidade: int):
         "secundario",
         hx_get="/produtos/lista",
         hx_include=f"#{FILTROS}",
+        hx_indicator=f"#{CARREGANDO}",
         hx_vals=f'{{"limite": {min(limite + LIMITE_PADRAO, LIMITE_MAXIMO)}}}',
         hx_target="#cartao-lista-produtos",
         hx_swap="outerHTML",
@@ -321,6 +329,7 @@ def _cartao_lista(
             catalogo_categorias,
             catalogo_fornecedores,
         ),
+        indicador(CARREGANDO),
         titulo="Produtos cadastrados",
         id_="cartao-lista-produtos",
     )
@@ -376,6 +385,7 @@ def _regiao(
                 catalogo_categorias,
                 catalogo_fornecedores,
             ),
+            indicador(CARREGANDO),
             titulo="Produtos cadastrados",
             id_="cartao-lista-produtos",
         ),

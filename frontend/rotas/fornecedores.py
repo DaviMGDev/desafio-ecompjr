@@ -5,12 +5,13 @@ from typing import Any
 from fasthtml.common import H1, APIRouter, Div, Form, Input, Redirect, Span
 
 from frontend import api, sessao
-from frontend.componentes import alerta, botao, campo, cartao, estado_vazio, shell
+from frontend.componentes import alerta, botao, campo, cartao, estado_vazio, indicador, shell
 from frontend.rotas import SEM_PERMISSAO, redirecionar_ao_login, resposta_403
 
 ar = APIRouter()
 
 REGIAO = "conteudo-fornecedores"
+CARREGANDO = "carregando-fornecedores"
 FILTROS = "filtros-fornecedores"
 LIMITE_PADRAO = 20
 LIMITE_MAXIMO = 100
@@ -66,11 +67,13 @@ def _form(
         ),
         # o filtro ativo viaja junto para a lista não perder o recorte
         hx_include=f"#{FILTROS}",
+        hx_indicator=f"#{CARREGANDO}",
         hx_post=destino,
         hx_target=f"#{REGIAO}",
         hx_swap="outerHTML",
         method="post",
         action=destino,
+        cls="formulario",
     )
 
 
@@ -93,6 +96,7 @@ def _filtros(nome: str = "") -> Form:
         id=FILTROS,
         cls="filtros",
         hx_get="/fornecedores/lista",
+        hx_indicator=f"#{CARREGANDO}",
         hx_target="#cartao-lista-fornecedores",
         hx_swap="outerHTML",
         method="get",
@@ -142,7 +146,9 @@ def _lista(fornecedores: list[dict[str, Any]], limite: int, pode_escrever: bool,
         )
         for fornecedor in fornecedores
     ]
-    return Div(Div(*itens, cls="lista"), _carregar_mais(limite, len(fornecedores)))
+    return Div(
+        Div(*itens, cls="lista"), indicador(CARREGANDO), _carregar_mais(limite, len(fornecedores))
+    )
 
 
 def _carregar_mais(limite: int, quantidade: int):
@@ -154,6 +160,7 @@ def _carregar_mais(limite: int, quantidade: int):
         "secundario",
         hx_get="/fornecedores/lista",
         hx_include=f"#{FILTROS}",
+        hx_indicator=f"#{CARREGANDO}",
         hx_vals=f'{{"limite": {min(limite + LIMITE_PADRAO, LIMITE_MAXIMO)}}}',
         hx_target="#cartao-lista-fornecedores",
         hx_swap="outerHTML",
@@ -215,6 +222,7 @@ def _regiao(
             erro
             if erro is not None
             else _lista(fornecedores, limite, sessao.eh_admin(sess), filtro),
+            indicador(CARREGANDO),
             titulo="Fornecedores cadastrados",
             id_="cartao-lista-fornecedores",
         ),

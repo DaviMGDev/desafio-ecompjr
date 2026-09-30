@@ -1,7 +1,10 @@
 /* Painel de estoque — tokens de `specs/DESIGN.md` traduzidos para o Pico CSS.
    Tema claro fixo, sem build: este arquivo é servido como está. */
 
-:root {
+/* Especificidade (0,2,0) de propósito: o Pico define as variáveis em
+   `:scope:not([data-theme=dark])`, que venceria um `:root` simples. */
+:root[data-theme="light"],
+:root:not([data-theme="dark"]) {
   --pico-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --pico-font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --pico-font-size: 100%;
@@ -46,6 +49,8 @@
 /* --- botões e títulos (classes pt-BR vindas do DESIGN.md) --------------- */
 
 .conteudo h1 {
+  /* Display serifada do DESIGN.md: wordmark e H1 de página */
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 1.6rem;
   margin-bottom: 0.75rem;
 }
@@ -141,7 +146,8 @@ button.ghost:hover,
 
 .menu a.ativo {
   background: rgba(15, 118, 110, 0.12);
-  color: var(--pico-primary);
+  /* primary-hover garante 4.5+:1 sobre a pílula clara (WCAG AA) */
+  color: var(--pico-primary-hover);
   font-weight: 600;
 }
 
@@ -301,6 +307,24 @@ button.ghost:hover,
   align-items: end;
 }
 
+/* Formulários de cadastro: grade fluida (DESIGN.md), empilham no estreito */
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 0.75rem;
+  align-items: start;
+}
+
+.formulario .campo {
+  margin-bottom: 0.5rem;
+}
+
+.formulario .filtros-acoes,
+.formulario .saldo,
+.formulario label:has(textarea) {
+  grid-column: 1 / -1;
+}
+
 .filtros .campo {
   margin-bottom: 0;
 }
@@ -402,6 +426,11 @@ button.ghost:hover,
   .menu {
     order: 3;
     width: 100%;
+  }
+
+  /* o título do item ocupa a linha toda; os metadados descem alinhados */
+  .item-principal {
+    flex-basis: 100%;
   }
 
   .acoes {

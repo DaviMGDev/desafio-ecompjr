@@ -11,6 +11,7 @@ from frontend.componentes import (
     campo,
     cartao,
     estado_vazio,
+    indicador,
     shell,
 )
 from frontend.rotas import SEM_PERMISSAO, redirecionar_ao_login, resposta_403
@@ -18,6 +19,7 @@ from frontend.rotas import SEM_PERMISSAO, redirecionar_ao_login, resposta_403
 ar = APIRouter()
 
 REGIAO = "conteudo-categorias"
+CARREGANDO = "carregando-categorias"
 LIMITE_PADRAO = 20
 LIMITE_MAXIMO = 100
 
@@ -54,11 +56,13 @@ def _form(
             else None,
             cls="filtros-acoes",
         ),
+        hx_indicator=f"#{CARREGANDO}",
         hx_post=destino,
         hx_target=f"#{REGIAO}",
         hx_swap="outerHTML",
         method="post",
         action=destino,
+        cls="formulario",
     )
 
 
@@ -97,7 +101,9 @@ def _lista(categorias: list[dict[str, Any]], limite: int, pode_escrever: bool):
         )
         for categoria in categorias
     ]
-    return Div(Div(*itens, cls="lista"), _carregar_mais(limite, len(categorias)))
+    return Div(
+        Div(*itens, cls="lista"), indicador(CARREGANDO), _carregar_mais(limite, len(categorias))
+    )
 
 
 def _carregar_mais(limite: int, quantidade: int):
@@ -108,6 +114,7 @@ def _carregar_mais(limite: int, quantidade: int):
         "Carregar mais",
         "secundario",
         hx_get="/categorias/lista",
+        hx_indicator=f"#{CARREGANDO}",
         hx_vals=f'{{"limite": {min(limite + LIMITE_PADRAO, LIMITE_MAXIMO)}}}',
         hx_target="#cartao-lista-categorias",
         hx_swap="outerHTML",

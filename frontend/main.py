@@ -20,6 +20,8 @@ app, rt = fast_app(
     htmx=False,
     surreal=False,
     title="Painel — 愚公移山 Variedades",
+    # Tema claro fixo (specs/DESIGN.md): o Pico não segue o esquema do sistema.
+    htmlkw={"data-theme": "light", "lang": "pt-BR"},
     secret_key=settings.session_secret,
     session_cookie=settings.session_cookie,
     static_path=str(DIR_ESTATICOS),

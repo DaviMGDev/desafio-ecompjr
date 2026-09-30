@@ -119,11 +119,13 @@ def _form(
         Div(botao("Registrar", "primario", type="submit"), cls="filtros-acoes"),
         id="form-movimentacao",
         hx_include=f"#{FILTROS}",
+        hx_indicator=f"#{CARREGANDO}",
         hx_post="/movimentacoes",
         hx_target=f"#{REGIAO}",
         hx_swap="outerHTML",
         method="post",
         action="/movimentacoes",
+        cls="formulario",
     )
 
 
