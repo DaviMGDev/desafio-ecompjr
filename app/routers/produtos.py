@@ -36,6 +36,16 @@ def listar_produtos(
     )
 
 
+@router.get("/estoque-baixo", response_model=list[ProdutoRead])
+def listar_produtos_estoque_baixo(
+    session: SessionDep,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> list[Produto]:
+    """Produtos com saldo no/abaixo do mínimo, ordenados por criticidade (§ 2.d)."""
+    return produtos.listar_estoque_baixo(session, limit=limit, offset=offset)
+
+
 @router.get("/{produto_id}", response_model=ProdutoRead)
 def obter_produto(produto_id: int, session: SessionDep) -> Produto:
     """Devolve um produto pelo id."""

@@ -95,3 +95,16 @@ def excluir(session: Session, produto_id: int) -> None:
     except IntegrityError as exc:
         session.rollback()
         raise conflito_de_integridade(exc, _MENSAGENS_DE_CONFLITO) from exc
+
+
+def listar_estoque_baixo(session: Session, *, limit: int, offset: int) -> list[Produto]:
+    """Produtos com saldo no/abaixo do mínimo, do mais crítico ao menos crítico."""
+    deficit = Produto.quantidade_minima - Produto.quantidade_em_estoque
+    consulta = (
+        select(Produto)
+        .where(Produto.quantidade_em_estoque <= Produto.quantidade_minima)
+        .order_by(deficit.desc(), Produto.id)
+        .limit(limit)
+        .offset(offset)
+    )
+    return list(session.scalars(consulta))
