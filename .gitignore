@@ -26,3 +26,6 @@ htmlcov/
 *.sqlite3
 *.dump
 dumps/
+
+# Estado local do agente (discussões, planos, snapshots — nunca versionar)
+.pi/
