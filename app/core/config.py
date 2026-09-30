@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     # Valor de desenvolvimento; em produção o segredo real vem do ambiente.
     jwt_secret: str = "dev-apenas-troque-no-env"
     jwt_expire_minutes: int = 60
+    # Admin semeado por `python -m app.seed`; sem credenciais reais no repo.
+    admin_email: str | None = None
+    admin_password: str | None = None
 
 
 settings = Settings()
