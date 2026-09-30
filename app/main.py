@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI
 
 from app.api.deps import usuario_atual
 from app.api.errors import registrar_handlers
+from app.api.openapi import resposta
 from app.routers import auth as rotas_auth
 from app.routers import categorias as rotas_categorias
 from app.routers import fornecedores as rotas_fornecedores
@@ -27,7 +28,12 @@ app.include_router(rotas_produtos.router, dependencies=[Depends(usuario_atual)])
 app.include_router(rotas_movimentacoes.router, dependencies=[Depends(usuario_atual)])
 
 
-@app.get("/health", tags=["infra"], summary="Verifica se a API está no ar")
+@app.get(
+    "/health",
+    tags=["infra"],
+    summary="Verifica se a API está no ar",
+    responses={200: resposta("API no ar", {"status": "ok"})},
+)
 def health() -> dict[str, str]:
     """Responde 200 quando a aplicação está pronta para receber requisições."""
     return {"status": "ok"}
