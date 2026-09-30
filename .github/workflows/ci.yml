@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-e-testes:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: estoque
+          POSTGRES_PASSWORD: estoque
+          POSTGRES_DB: estoque
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U estoque -d estoque"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://estoque:estoque@localhost:5432/estoque
+      JWT_SECRET: segredo-de-ci-com-32-bytes-ou-mais-para-testes
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.7"
+          enable-cache: true
+
+      - name: Instala as dependências
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Aplica as migrations no banco de CI
+        run: uv run alembic upgrade head
+
+      - name: Testes
+        run: uv run pytest -q
