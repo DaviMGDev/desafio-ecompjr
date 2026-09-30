@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://estoque:estoque@localhost:5432/estoque"
     # Valor de desenvolvimento; em produção o segredo real vem do ambiente.
-    jwt_secret: str = "dev-apenas-troque-no-env"
+    jwt_secret: str = "dev-apenas-troque-no-env-com-32-bytes-ou-mais"
     jwt_expire_minutes: int = 60
     # Admin semeado por `python -m app.seed`; sem credenciais reais no repo.
     admin_email: str | None = None
