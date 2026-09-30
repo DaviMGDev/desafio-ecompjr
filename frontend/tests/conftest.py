@@ -14,6 +14,75 @@ from app.main import app as app_api
 from frontend import api as api_painel
 from frontend.main import app as app_painel
 
+HX = {"HX-Request": "1"}
+
+
+@pytest.fixture()
+def criar_categoria(client):
+    """Cria uma categoria pela API (como o admin do teste)."""
+
+    def _criar(nome: str = "Bebidas"):
+        resposta = client.post("/categorias", json={"nome": nome})
+        assert resposta.status_code == 201, resposta.text
+        return resposta.json()
+
+    return _criar
+
+
+@pytest.fixture()
+def criar_fornecedor(client):
+    """Cria um fornecedor válido pela API (CNPJ com dígitos verificadores)."""
+
+    def _criar(
+        nome: str = "Distribuidora Aurora",
+        cnpj: str = "11222333000181",
+        email: str = "contato@aurora.com",
+        telefone: str = "75999990000",
+    ):
+        resposta = client.post(
+            "/fornecedores",
+            json={"nome": nome, "cnpj": cnpj, "telefone": telefone, "email": email},
+        )
+        assert resposta.status_code == 201, resposta.text
+        return resposta.json()
+
+    return _criar
+
+
+@pytest.fixture()
+def criar_produto(client, criar_categoria, criar_fornecedor):
+    """Cria um produto pela API, com categoria e fornecedor se faltarem."""
+
+    def _criar(
+        nome: str = "Chá preto 500g",
+        sku: str = "CHA-500",
+        preco_custo: str = "8.50",
+        preco_venda: str = "14.90",
+        quantidade_minima: int = 0,
+        categoria_id: int | None = None,
+        fornecedor_id: int | None = None,
+    ):
+        if categoria_id is None:
+            categoria_id = criar_categoria()["id"]
+        if fornecedor_id is None:
+            fornecedor_id = criar_fornecedor()["id"]
+        resposta = client.post(
+            "/produtos",
+            json={
+                "nome": nome,
+                "sku": sku,
+                "preco_custo": preco_custo,
+                "preco_venda": preco_venda,
+                "quantidade_minima": quantidade_minima,
+                "categoria_id": categoria_id,
+                "fornecedor_id": fornecedor_id,
+            },
+        )
+        assert resposta.status_code == 201, resposta.text
+        return resposta.json()
+
+    return _criar
+
 
 class TransporteASGI(httpx2.BaseTransport):
     """Leva as chamadas síncronas do painel ao app ASGI da API (só testes)."""

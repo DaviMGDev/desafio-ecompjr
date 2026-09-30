@@ -168,7 +168,10 @@ def indicador(id_: str):
     return Span("Carregando…", id=id_, cls="carregando htmx-indicator")
 
 
-def cartao(*conteudo, titulo: str | None = None, cls: str = ""):
-    """Cartão de seção, com título opcional."""
+def cartao(*conteudo, titulo: str | None = None, cls: str = "", id_: str | None = None):
+    """Cartão de seção, com título e id opcionais (o id é o alvo do HTMX)."""
     filhos = [Span(titulo, cls="cartao-titulo")] if titulo else []
-    return Div(*filhos, *conteudo, cls=f"cartao {cls}".strip())
+    attrs: dict = {"cls": f"cartao {cls}".strip()}
+    if id_:
+        attrs["id"] = id_
+    return Div(*filhos, *conteudo, **attrs)
