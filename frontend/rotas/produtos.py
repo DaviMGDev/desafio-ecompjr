@@ -16,6 +16,7 @@ from frontend.componentes import (
     shell,
 )
 from frontend.rotas import SEM_PERMISSAO, redirecionar_ao_login, resposta_403
+from frontend.rotas.catalogos import nome_por_id, opcoes_categorias, opcoes_fornecedores
 
 ar = APIRouter()
 
@@ -31,26 +32,6 @@ def _inteiro(valor: Any) -> int:
         return int(str(valor).strip())
     except (TypeError, ValueError):
         return 0
-
-
-def _opcoes(sess, recurso: str) -> list[tuple[str, str]]:
-    """Opções de categoria ou fornecedor, vindas da API (limit 100)."""
-    token = sessao.token_da_sessao(sess)
-    if recurso == "categorias":
-        status, corpo = api.listar_categorias(token, limit=LIMITE_MAXIMO, offset=0)
-    else:
-        status, corpo = api.listar_fornecedores(token, limit=LIMITE_MAXIMO, offset=0)
-    if status != 200:
-        return []
-    return [(str(item["id"]), item["nome"]) for item in corpo]
-
-
-def _nome_por_id(opcoes: list[tuple[str, str]], identificador: Any) -> str:
-    """Resolve o nome de categoria/fornecedor a partir das opções carregadas."""
-    for valor, nome in opcoes:
-        if valor == str(identificador):
-            return nome
-    return f"#{identificador}"
 
 
 def _form(
@@ -217,11 +198,11 @@ def _lista(
                     cls="item-principal",
                 ),
                 Span(
-                    f"Categoria: {_nome_por_id(opcoes_categorias, produto['categoria_id'])}",
+                    f"Categoria: {nome_por_id(opcoes_categorias, produto['categoria_id'])}",
                     cls="item-meta",
                 ),
                 Span(
-                    f"Fornecedor: {_nome_por_id(opcoes_fornecedores, produto['fornecedor_id'])}",
+                    f"Fornecedor: {nome_por_id(opcoes_fornecedores, produto['fornecedor_id'])}",
                     cls="item-meta",
                 ),
                 Span(f"Estoque: {produto['quantidade_em_estoque']}", cls="item-saldo"),
@@ -304,8 +285,8 @@ def _contexto(
     return (
         produtos,
         erro,
-        _opcoes(sess, "categorias"),
-        _opcoes(sess, "fornecedores"),
+        opcoes_categorias(sess),
+        opcoes_fornecedores(sess),
     )
 
 
@@ -320,15 +301,15 @@ def _cartao_lista(
     produtos, erro = _buscar(sess, limite, filtro_nome, filtro_categoria_id, filtro_fornecedor_id)
     if isinstance(erro, Redirect):
         return erro
-    opcoes_categorias = _opcoes(sess, "categorias")
-    opcoes_fornecedores = _opcoes(sess, "fornecedores")
+    catalogo_categorias = opcoes_categorias(sess)
+    catalogo_fornecedores = opcoes_fornecedores(sess)
     return cartao(
         _filtros(
             filtro_nome,
             filtro_categoria_id,
             filtro_fornecedor_id,
-            opcoes_categorias,
-            opcoes_fornecedores,
+            catalogo_categorias,
+            catalogo_fornecedores,
         ),
         erro
         if erro is not None
@@ -337,8 +318,8 @@ def _cartao_lista(
             limite,
             sessao.eh_admin(sess),
             bool(filtro_nome or filtro_categoria_id or filtro_fornecedor_id),
-            opcoes_categorias,
-            opcoes_fornecedores,
+            catalogo_categorias,
+            catalogo_fornecedores,
         ),
         titulo="Produtos cadastrados",
         id_="cartao-lista-produtos",
@@ -357,7 +338,7 @@ def _regiao(
     filtro_fornecedor_id: str = "",
 ):
     """Região mutável da tela: aviso + formulário + lista filtrada."""
-    produtos, erro, opcoes_categorias, opcoes_fornecedores = _contexto(
+    produtos, erro, catalogo_categorias, catalogo_fornecedores = _contexto(
         sess, limite, filtro_nome, filtro_categoria_id, filtro_fornecedor_id
     )
     if isinstance(erro, Redirect):
@@ -369,8 +350,8 @@ def _regiao(
             form
             if form is not None
             else _form(
-                opcoes_categorias=opcoes_categorias,
-                opcoes_fornecedores=opcoes_fornecedores,
+                opcoes_categorias=catalogo_categorias,
+                opcoes_fornecedores=catalogo_fornecedores,
             ),
             titulo=titulo_form,
             id_="cartao-form-produto",
@@ -382,8 +363,8 @@ def _regiao(
                 filtro_nome,
                 filtro_categoria_id,
                 filtro_fornecedor_id,
-                opcoes_categorias,
-                opcoes_fornecedores,
+                catalogo_categorias,
+                catalogo_fornecedores,
             ),
             erro
             if erro is not None
@@ -392,8 +373,8 @@ def _regiao(
                 limite,
                 sessao.eh_admin(sess),
                 bool(filtro_nome or filtro_categoria_id or filtro_fornecedor_id),
-                opcoes_categorias,
-                opcoes_fornecedores,
+                catalogo_categorias,
+                catalogo_fornecedores,
             ),
             titulo="Produtos cadastrados",
             id_="cartao-lista-produtos",
@@ -467,8 +448,8 @@ def editar_produto(
             categoria_id=corpo["categoria_id"],
             fornecedor_id=corpo["fornecedor_id"],
             produto_id=corpo["id"],
-            opcoes_categorias=_opcoes(sess, "categorias"),
-            opcoes_fornecedores=_opcoes(sess, "fornecedores"),
+            opcoes_categorias=opcoes_categorias(sess),
+            opcoes_fornecedores=opcoes_fornecedores(sess),
         ),
         titulo_form="Editar produto",
         filtro_nome=filtro_nome.strip(),
@@ -526,8 +507,8 @@ def _criar_ou_atualizar(
                 **dados,
                 produto_id=produto_id,
                 erros=api.erros_por_campo(api.detail_do_corpo(corpo)),
-                opcoes_categorias=_opcoes(sess, "categorias"),
-                opcoes_fornecedores=_opcoes(sess, "fornecedores"),
+                opcoes_categorias=opcoes_categorias(sess),
+                opcoes_fornecedores=opcoes_fornecedores(sess),
             ),
             titulo_form="Editar produto" if produto_id else "Novo produto",
             **filtros,
@@ -538,8 +519,8 @@ def _criar_ou_atualizar(
         form=_form(
             **dados,
             produto_id=produto_id,
-            opcoes_categorias=_opcoes(sess, "categorias"),
-            opcoes_fornecedores=_opcoes(sess, "fornecedores"),
+            opcoes_categorias=opcoes_categorias(sess),
+            opcoes_fornecedores=opcoes_fornecedores(sess),
         ),
         titulo_form="Editar produto" if produto_id else "Novo produto",
         **filtros,
