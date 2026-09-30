@@ -28,8 +28,8 @@ jobs:
       JWT_SECRET: segredo-de-ci-com-32-bytes-ou-mais-para-testes
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           version: "0.11.7"
           enable-cache: true
