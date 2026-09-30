@@ -16,6 +16,7 @@ from fasthtml.common import (
     Select,
     Small,
     Span,
+    Textarea,
     Title,
 )
 
@@ -143,6 +144,23 @@ def select_campo(
     return Label(
         Span(rotulo, cls="rotulo"),
         Select(*itens, name=nome, aria_invalid="true" if erro else None, **attrs),
+        Small(erro, cls="erro-campo") if erro else None,
+        cls="campo campo-com-erro" if erro else "campo",
+    )
+
+
+def campo_longo(
+    rotulo: str,
+    nome: str,
+    *,
+    valor: str = "",
+    erro: str | None = None,
+    **attrs,
+) -> Label:
+    """Campo de texto longo (textarea) com rótulo e mensagem de erro."""
+    return Label(
+        Span(rotulo, cls="rotulo"),
+        Textarea(valor or "", name=nome, aria_invalid="true" if erro else None, **attrs),
         Small(erro, cls="erro-campo") if erro else None,
         cls="campo campo-com-erro" if erro else "campo",
     )

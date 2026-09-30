@@ -353,6 +353,17 @@ button.ghost:hover,
   font-weight: 600;
 }
 
+.item-quantidade {
+  font-weight: 600;
+}
+
+.saldo {
+  display: block;
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+  margin: -0.35rem 0 0.75rem;
+}
+
 .acoes {
   display: flex;
   gap: 0.5rem;
