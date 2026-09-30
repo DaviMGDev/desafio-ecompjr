@@ -13,7 +13,7 @@
 | Caminho | Papel |
 |---|---|
 | `desafio-tecnico-backend-prosel-2026.2/desafio-tecnico-backend-prosel-2026.2.md` | Enunciado oficial (**read-only** — nunca editar) |
-| `specs/` | Especificações do projeto (a criar pelo candidato; domínio, features BDD e decisões em prosa) |
+| `specs/` | Especificações do projeto: contrato spec-md (`SPEC.md`), features BDD em `specs/features/` e decisões em prosa |
 | `docs/adr/` | ADRs — decisões técnicas explicáveis na defesa (ver *Registro de decisões (ADR)*) |
 | `README.md` | Documentação de entrega (setup, rotas, exemplos) — ainda não existe |
 
