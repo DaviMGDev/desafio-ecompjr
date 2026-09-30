@@ -78,6 +78,8 @@ pygments==2.21.0
 pyjwt==2.15.1
     # via desafio-ecompjr
 pytest==9.1.1
+    # via pytest-randomly
+pytest-randomly==5.0.0
 python-dotenv==1.2.3
     # via
     #   pydantic-settings
