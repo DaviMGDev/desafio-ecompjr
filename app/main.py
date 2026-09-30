@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.api.errors import registrar_handlers
 from app.routers import categorias as rotas_categorias
 from app.routers import fornecedores as rotas_fornecedores
+from app.routers import movimentacoes as rotas_movimentacoes
 from app.routers import produtos as rotas_produtos
 
 app = FastAPI(
@@ -20,6 +21,7 @@ registrar_handlers(app)
 app.include_router(rotas_fornecedores.router)
 app.include_router(rotas_categorias.router)
 app.include_router(rotas_produtos.router)
+app.include_router(rotas_movimentacoes.router)
 
 
 @app.get("/health", tags=["infra"], summary="Verifica se a API está no ar")
