@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fasthtml.common import APIRouter, Div, Form, Input, Redirect, Span
+from fasthtml.common import H1, APIRouter, Div, Form, Input, Redirect, Span
 
 from frontend import api, sessao
 from frontend.componentes import alerta, botao, campo, cartao, estado_vazio, shell
@@ -228,7 +228,13 @@ def tela_fornecedores(sess):
     regiao = _regiao(sess)
     if isinstance(regiao, Redirect):
         return regiao
-    return shell(regiao, sess=sess, atual="/fornecedores", nome_pagina="Fornecedores")
+    return shell(
+        H1("Fornecedores"),
+        regiao,
+        sess=sess,
+        atual="/fornecedores",
+        nome_pagina="Fornecedores",
+    )
 
 
 @ar("/fornecedores/novo", methods=["GET"])

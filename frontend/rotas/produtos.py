@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fasthtml.common import APIRouter, Div, Form, Input, Redirect, Span
+from fasthtml.common import H1, APIRouter, Div, Form, Input, Redirect, Span
 
 from frontend import api, sessao
 from frontend.componentes import (
@@ -389,7 +389,7 @@ def tela_produtos(sess):
     regiao = _regiao(sess)
     if isinstance(regiao, Redirect):
         return regiao
-    return shell(regiao, sess=sess, atual="/produtos", nome_pagina="Produtos")
+    return shell(H1("Produtos"), regiao, sess=sess, atual="/produtos", nome_pagina="Produtos")
 
 
 @ar("/produtos/novo", methods=["GET"])

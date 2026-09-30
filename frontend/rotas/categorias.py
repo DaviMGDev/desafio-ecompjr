@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fasthtml.common import APIRouter, Div, Form, Input, Redirect, Span
+from fasthtml.common import H1, APIRouter, Div, Form, Input, Redirect, Span
 
 from frontend import api, sessao
 from frontend.componentes import (
@@ -174,7 +174,7 @@ def tela_categorias(sess):
     regiao = _regiao(sess)
     if isinstance(regiao, Redirect):
         return regiao
-    return shell(regiao, sess=sess, atual="/categorias", nome_pagina="Categorias")
+    return shell(H1("Categorias"), regiao, sess=sess, atual="/categorias", nome_pagina="Categorias")
 
 
 @ar("/categorias/novo", methods=["GET"])

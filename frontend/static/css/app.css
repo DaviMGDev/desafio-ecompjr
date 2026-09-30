@@ -43,6 +43,65 @@
   outline-offset: 2px;
 }
 
+/* --- botões e títulos (classes pt-BR vindas do DESIGN.md) --------------- */
+
+.conteudo h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.subtitulo-pagina {
+  color: var(--pico-muted-color);
+  margin-bottom: 1rem;
+}
+
+button.secundario,
+a.secundario,
+[role="button"].secundario {
+  background-color: transparent;
+  border: 1px solid var(--pico-primary);
+  color: var(--pico-primary);
+}
+
+button.secundario:hover,
+a.secundario:hover,
+[role="button"].secundario:hover {
+  background-color: rgba(15, 118, 110, 0.08);
+  border-color: var(--pico-primary-hover);
+  color: var(--pico-primary-hover);
+}
+
+button.danger {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
+button.danger:hover {
+  background-color: #991b1b;
+  border-color: #991b1b;
+}
+
+button.ghost,
+[role="button"].ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--pico-muted-color);
+}
+
+button.ghost:hover,
+[role="button"].ghost:hover {
+  background-color: rgba(28, 25, 23, 0.06);
+  color: var(--pico-color);
+}
+
+.pequeno {
+  width: auto;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
 /* --- casca ------------------------------------------------------------- */
 
 .topo {
@@ -104,6 +163,10 @@
 
 .form-sair button {
   margin: 0;
+}
+
+.form-login button {
+  width: 100%;
 }
 
 .conteudo {
@@ -248,6 +311,11 @@
   flex-wrap: wrap;
 }
 
+.filtros-acoes button {
+  width: auto;
+  margin: 0;
+}
+
 .lista {
   display: grid;
   gap: 0.75rem;
@@ -279,6 +347,10 @@
 .item-meta {
   color: var(--pico-muted-color);
   font-size: 0.85rem;
+}
+
+.item-saldo {
+  font-weight: 600;
 }
 
 .acoes {
